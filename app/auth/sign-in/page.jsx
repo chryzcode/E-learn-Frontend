@@ -1,37 +1,46 @@
 "use client";
+
 import Link from "next/link";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation"; // Use next/navigation for useRouter in App Router
+import { toast } from "react-toastify";
+import { useAuthDispatch } from "@/app/utils/AuthContext";
 
 const SignInPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const dispatch = useAuthDispatch();
+  const router = useRouter();
 
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
 
-  const handleSubmit = async e => {
-    e.preventDefault();
+   const handleSubmit = async e => {
+     e.preventDefault();
 
-    try {
-      const response = await fetch(`${BACKEND_URL}/auth/signin`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+     try {
+       const response = await fetch(`${BACKEND_URL}/auth/signin`, {
+         method: "POST",
+         headers: {
+           "Content-Type": "application/json",
+         },
+         body: JSON.stringify({ email, password }),
+       });
 
-      if (!response.ok) {
-        throw new Error("Sign-in failed");
-      }
+       const data = await response.json();
 
-      const data = await response.json();
-      // Handle successful sign-in, e.g., store token, redirect user
-      console.log("Sign-in successful:", data);
-    } catch (error) {
-      setError(error.message);
-    }
-  };
+       if (!response.ok) {
+         const errorMessage = data.msg || "Sign-in failed";
+         throw new Error(errorMessage);
+       }
+
+       dispatch({ type: "LOGIN", payload: data });
+       toast.success("Sign-in successful!");
+       router.push("/");
+     } catch (error) {
+       toast.error("Sign-in failed");
+     }
+   };
 
   return (
     <div className="mx-4 md:mx-10">
