@@ -13,7 +13,7 @@ const Nav = () => {
   };
 
   return (
-    <header className="flex items-center justify-between p-4  text-black border border-gray-300">
+    <header className="flex items-center justify-between p-4  text-black shadow-lg border border-gray-300">
       <div>
         <Link href="/" className="text-xl font-bold">
           E-Learn

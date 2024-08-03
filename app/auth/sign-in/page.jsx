@@ -38,7 +38,7 @@ const SignInPage = () => {
        toast.success("Sign-in successful!");
        router.push("/");
      } catch (error) {
-       toast.error(error.message);
+       toast.error("Sign-in failed");
      }
    };
 
