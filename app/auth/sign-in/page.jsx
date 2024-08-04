@@ -51,7 +51,7 @@ const SignInPage = () => {
         </a>
       </p>
       <div className="flex-wrap-container py-5 align-middle px-2 md:px-10">
-        <div className="border border-gray-300 rounded-lg p-4 md:p-6 shadow-lg mx-auto max-w-md">
+        <div className="border border-gray-300 p-4 md:p-6 shadow-lg mx-auto max-w-md">
           <form className="" onSubmit={handleSubmit}>
             <div className="my-3">
               <label htmlFor="email" className="block mb-2 text-sm">
@@ -65,8 +65,8 @@ const SignInPage = () => {
                 onChange={e => {
                   setEmail(e.target.value);
                 }}
-                className="border rounded w-full py-2 px-3 mb-2"
-                placeholder="JDoe or johndoe@gmail.com"
+                className="border w-full py-2 px-3 mb-2"
+                placeholder="johndoe@gmail.com"
                 required
               />
             </div>
@@ -83,7 +83,7 @@ const SignInPage = () => {
                 onChange={e => {
                   setPassword(e.target.value);
                 }}
-                className="border rounded w-full py-2 px-3 mb-2"
+                className="border w-full py-2 px-3 mb-2"
                 placeholder="*********"
                 required
               />
