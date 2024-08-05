@@ -59,7 +59,7 @@ const forgotPasswordPage = () => {
 
             <div className="mx-auto w-24 md:w-32 my-6 md:my-8 text-center">
               <button
-                className="bg-black text-white font-bold py-2 px-4 focus:outline-none focus:shadow-outline w-full md:w-auto transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black"
+                className="bg-black text-white font-bold py-2 px-4 focus:outline-none focus:shadow-outline w-auto md:w-auto transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black"
                 type="submit">
                 Get Mail
               </button>

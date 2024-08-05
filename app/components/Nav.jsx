@@ -104,34 +104,53 @@ const Nav = () => {
           <nav
             ref={mobileMenuRef}
             className="md:hidden absolute top-16 left-0 w-full bg-white border-t text-center border-gray-300 shadow-lg">
-            <Link href="/" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            <Link
+              href="/"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              onClick={() => setMobileMenuOpen(false)}>
               Explore
             </Link>
             {user ? (
               <>
-                <Link href="/my-courses" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <Link
+                  href="/my-courses"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => setMobileMenuOpen(false)}>
                   My Courses
                 </Link>
-                <Link href="/my-account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <Link
+                  href="/my-account"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => setMobileMenuOpen(false)}>
                   My Account
                 </Link>
-                <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <Link
+                  href="/settings"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => setMobileMenuOpen(false)}>
                   Settings
                 </Link>
                 <button
-                  onClick={handleLogout}
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                   Logout
                 </button>
               </>
             ) : (
               <>
-                <Link href="/auth/sign-in" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <Link
+                  href="/auth/sign-in"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => setMobileMenuOpen(false)}>
                   Sign In
                 </Link>
                 <Link
                   href="/auth/sign-up"
-                  className="block px-4 py-2 text-sm bg-black text-white font-bold focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black">
+                  className="block px-4 py-2 text-sm bg-black text-white font-bold focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black"
+                  onClick={() => setMobileMenuOpen(false)}>
                   Sign Up
                 </Link>
               </>
