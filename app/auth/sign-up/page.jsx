@@ -42,7 +42,7 @@ const SignUpPage = () => {
 
   return (
     <div className="mx-4 md:mx-10">
-      <p className="text-3xl text-customPurple font-semibold mx-auto text-center py-5 md:py-7">Sign Up</p>
+      <p className="text-2xl text-customPurple font-semibold mx-auto text-center py-5 md:py-7">Sign Up</p>
       <p className="text-center">
         Do have an E-learn account?{" "}
         <a href="/auth/sign-in" className="text-customPurple hover:underline font-semibold">

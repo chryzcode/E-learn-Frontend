@@ -43,7 +43,7 @@ const SignInPage = () => {
 
   return (
     <div className="mx-4 md:mx-10">
-      <p className="text-3xl text-customPurple font-semibold mx-auto text-center py-5 md:py-7">Sign In</p>
+      <p className="text-2xl text-customPurple font-semibold mx-auto text-center py-5 md:py-7">Sign In</p>
       <p className="text-center">
         Do not have an E-learn account?{" "}
         <a href="/auth/sign-up" className="text-customPurple hover:underline font-semibold">
@@ -99,7 +99,7 @@ const SignInPage = () => {
           </form>
 
           <div className="text-customPurple text-center hover:underline">
-            <Link href="/forgot-password" className="text-sm">
+            <Link href="/auth/forgot-password" className="text-sm">
               Forgot password?
             </Link>
           </div>
