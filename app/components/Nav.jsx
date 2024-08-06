@@ -130,14 +130,15 @@ const Nav = () => {
                   onClick={() => setMobileMenuOpen(false)}>
                   Settings
                 </Link>
-                <button
+                <Link
+                  href=""
                   onClick={() => {
                     handleLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className="block w-full text-left px-4 py-4 text-base text-gray-700 hover:bg-gray-100">
+                  className="block px-4 py-4 text-base bg-black text-white font-bold focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black">
                   Logout
-                </button>
+                </Link>
               </>
             ) : (
               <>
