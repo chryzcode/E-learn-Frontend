@@ -59,7 +59,7 @@ const settingsPage = () => {
       });
 
       const data = await response.json();
-      console.log(data.msg);
+      console.log(data);
 
       if (!response.ok) {
         const errorMessage = data.msg || data.error || "Update failed";
