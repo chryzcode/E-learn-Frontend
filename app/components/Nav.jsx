@@ -9,6 +9,7 @@ const Nav = () => {
   const dispatch = useAuthDispatch();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const mobileMenuRef = useRef(null);
 
   const handleLogout = () => {
@@ -41,6 +42,52 @@ const Nav = () => {
     };
   }, [isMobileMenuOpen]);
 
+  useEffect(() => {
+    console.log("Authenticated User:", user); // Debugging log for user
+    setIsLoading(user === null); // Set loading to false once user state is updated
+  }, [user]);
+
+  const renderUserLinks = () => {
+    return (
+      <div className="relative">
+        <button onClick={toggleDropdown} className="text-base py-2 px-4 rounded">
+          {user?.user?.fullName}
+        </button>
+        {isDropdownOpen && (
+          <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded">
+            <Link href="/my-courses" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              My Courses
+            </Link>
+            <Link href="/my-account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              My Account
+            </Link>
+            <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              Settings
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderAuthLinks = () => {
+    return (
+      <>
+        <Link href="/auth/sign-in">Sign In</Link>
+        <Link
+          href="/auth/sign-up"
+          className="bg-black text-white font-bold py-2 px-4 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black">
+          Sign Up
+        </Link>
+      </>
+    );
+  };
+
   return (
     <>
       <header className="fixed top-0 left-0 right-0 flex items-center justify-between p-6 mb-5 text-black shadow-lg border border-gray-300 bg-white z-10">
@@ -53,40 +100,7 @@ const Nav = () => {
           <Link href="/">Explore</Link>
         </nav>
         <div className="hidden md:flex flex-1 justify-end items-center space-x-6">
-          {user ? (
-            <div className="relative">
-              <button onClick={toggleDropdown} className="text-base font-bold py-2 px-4 rounded">
-                {user.name}
-              </button>
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded">
-                  <Link href="/my-courses" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    My Courses
-                  </Link>
-                  <Link href="/my-account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    My Account
-                  </Link>
-                  <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Settings
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <>
-              <Link href="/auth/sign-in">Sign In</Link>
-              <Link
-                href="/auth/sign-up"
-                className="bg-black text-white font-bold py-2 px-4 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black">
-                Sign Up
-              </Link>
-            </>
-          )}
+          {isLoading ? null : user ? renderUserLinks() : renderAuthLinks()}
         </div>
         <div className="md:hidden flex items-center">
           <button onClick={toggleMobileMenu} className="focus:outline-none">
@@ -110,7 +124,7 @@ const Nav = () => {
               onClick={() => setMobileMenuOpen(false)}>
               Explore
             </Link>
-            {user ? (
+            {isLoading ? null : user ? (
               <>
                 <Link
                   href="/my-courses"
