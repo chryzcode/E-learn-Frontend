@@ -9,11 +9,12 @@ const Nav = () => {
   const dispatch = useAuthDispatch();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const dropdownRef = useRef(null);
   const mobileMenuRef = useRef(null);
 
   const handleLogout = () => {
     dispatch({ type: "LOGOUT" });
+    setDropdownOpen(false); // Close dropdown on logout
   };
 
   const toggleDropdown = () => {
@@ -25,68 +26,20 @@ const Nav = () => {
   };
 
   const handleClickOutside = event => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setDropdownOpen(false);
+    }
     if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
       setMobileMenuOpen(false);
     }
   };
 
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.addEventListener("click", handleClickOutside);
-    } else {
-      document.removeEventListener("click", handleClickOutside);
-    }
-
+    document.addEventListener("click", handleClickOutside);
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, [isMobileMenuOpen]);
-
-  useEffect(() => {
-    console.log("Authenticated User:", user); // Debugging log for user
-    setIsLoading(user === null); // Set loading to false once user state is updated
-  }, [user]);
-
-  const renderUserLinks = () => {
-    return (
-      <div className="relative">
-        <button onClick={toggleDropdown} className="text-base py-2 px-4 rounded">
-          {user?.user?.fullName}
-        </button>
-        {isDropdownOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded">
-            <Link href="/my-courses" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-              My Courses
-            </Link>
-            <Link href="/my-account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-              My Account
-            </Link>
-            <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-              Settings
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-              Logout
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderAuthLinks = () => {
-    return (
-      <>
-        <Link href="/auth/sign-in">Sign In</Link>
-        <Link
-          href="/auth/sign-up"
-          className="bg-black text-white font-bold py-2 px-4 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black">
-          Sign Up
-        </Link>
-      </>
-    );
-  };
+  }, []);
 
   return (
     <>
@@ -100,7 +53,54 @@ const Nav = () => {
           <Link href="/">Explore</Link>
         </nav>
         <div className="hidden md:flex flex-1 justify-end items-center space-x-6">
-          {isLoading ? null : user ? renderUserLinks() : renderAuthLinks()}
+          {user ? (
+            <div className="relative" ref={dropdownRef}>
+              <button onClick={toggleDropdown} className="text-base py-2 px-4 rounded">
+                {user.user.fullName}
+              </button>
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded">
+                  <Link
+                    href="/my-courses"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    My Courses
+                  </Link>
+                  <Link
+                    href="/my-account"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    My Account
+                  </Link>
+                  <Link
+                    href="/settings"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    Settings
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <Link href="/auth/sign-in">Sign In</Link>
+              <Link
+                href="/auth/sign-up"
+                className="bg-black text-white font-bold py-2 px-4 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
         <div className="md:hidden flex items-center">
           <button onClick={toggleMobileMenu} className="focus:outline-none">
@@ -109,7 +109,8 @@ const Nav = () => {
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg">
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
           </button>
@@ -117,31 +118,36 @@ const Nav = () => {
         {isMobileMenuOpen && (
           <nav
             ref={mobileMenuRef}
-            className="md:hidden absolute top-16 left-0 w-full bg-white border-t text-center border-gray-300 shadow-lg">
+            className="md:hidden absolute top-16 left-0 w-full bg-white border-t text-center border-gray-300 shadow-lg"
+          >
             <Link
               href="/"
               className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
-              onClick={() => setMobileMenuOpen(false)}>
+              onClick={() => setMobileMenuOpen(false)}
+            >
               Explore
             </Link>
-            {isLoading ? null : user ? (
+            {user ? (
               <>
                 <Link
                   href="/my-courses"
                   className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
-                  onClick={() => setMobileMenuOpen(false)}>
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   My Courses
                 </Link>
                 <Link
                   href="/my-account"
                   className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
-                  onClick={() => setMobileMenuOpen(false)}>
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   My Account
                 </Link>
                 <Link
                   href="/settings"
                   className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
-                  onClick={() => setMobileMenuOpen(false)}>
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   Settings
                 </Link>
                 <Link
@@ -150,7 +156,8 @@ const Nav = () => {
                     handleLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className="block px-4 py-4 text-base bg-black text-white font-bold focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black">
+                  className="block px-4 py-4 text-base bg-black text-white font-bold focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black"
+                >
                   Logout
                 </Link>
               </>
@@ -159,13 +166,15 @@ const Nav = () => {
                 <Link
                   href="/auth/sign-in"
                   className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
-                  onClick={() => setMobileMenuOpen(false)}>
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   Sign In
                 </Link>
                 <Link
                   href="/auth/sign-up"
                   className="block px-4 py-4 text-base bg-black text-white font-bold focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black"
-                  onClick={() => setMobileMenuOpen(false)}>
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   Sign Up
                 </Link>
               </>
