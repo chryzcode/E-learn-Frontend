@@ -9,7 +9,7 @@ const withAuth = WrappedComponent => {
 
     useEffect(() => {
       if (!user) {
-        router.replace("/auth/sign-in"); // Adjust the login path as needed
+        router.push("/"); // Adjust the login path as needed
       }
     }, [user, router]);
 

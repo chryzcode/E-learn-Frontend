@@ -3,39 +3,48 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // Use next/navigation for useRouter in App Router
 import { toast } from "react-toastify";
+import Spinner from "@/app/components/Spinner";
 
-const forgotPasswordPage = () => {
+const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false); // Manage loading state
   const router = useRouter();
 
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
 
   const handleSubmit = async e => {
     e.preventDefault();
+    setLoading(true); // Set loading to true when the form is submitted
 
-    const response = await fetch(`${BACKEND_URL}/send-forgot-password-link`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email }),
-    });
+    try {
+      const response = await fetch(`${BACKEND_URL}/send-forgot-password-link`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      const errorMessage = data.msg || "Forgot password failed";
-      toast.error(errorMessage);
-      throw new Error(errorMessage);
+      if (!response.ok) {
+        const errorMessage = data.msg || data.error || "Forgot password failed";
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      toast.success("Check your mail!");
+      router.push("/auth/sign-in");
+    } catch (error) {
+      console.log("Forgot password failed");
+    } finally {
+      setLoading(false); // Set loading to false when the request is completed
     }
-
-    toast.success("Check your mail!");
-    router.push("/auth/sign-in");
   };
+
   return (
     <div className="mx-4 md:mx-10">
       <p className="text-2xl text-customPurple font-semibold mx-auto text-center py-5 md:py-7">Forgot Password?</p>
-
       <div className="flex-wrap-container py-5 align-middle px-2 md:px-10">
         <div className="border border-gray-300 p-4 md:p-6 shadow-lg mx-auto max-w-md">
           <form className="" onSubmit={handleSubmit}>
@@ -67,8 +76,9 @@ const forgotPasswordPage = () => {
           </form>
         </div>
       </div>
+      {loading && <Spinner />} {/* Conditionally render the spinner */}
     </div>
   );
 };
 
-export default forgotPasswordPage;
+export default ForgotPasswordPage;
