@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // Use next/navigation for useRouter in App Router
 import { toast } from "react-toastify";
 import { useAuthDispatch } from "@/app/utils/AuthContext";
-import Spinner from "../components/Spinner"; // Import the Spinner component
+import Spinner from "@/app/components/Spinner";
 
 const SignInPage = () => {
   const [email, setEmail] = useState("");

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter, useParams } from "next/navigation"; // Use next/navigation for useRouter and useParams in App Router
 import { toast } from "react-toastify";
-import Spinner from "../components/Spinner"; // Import the Spinner component
+import Spinner from "@/app/components/Spinner";
 
 const ChangePasswordPage = () => {
   const [password, setPassword] = useState("");

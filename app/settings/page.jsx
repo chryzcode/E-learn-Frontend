@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import withAuth from "../utils/WithAuth";
 import { useRouter } from "next/navigation";
-import Spinner from "../components/Spinner";
+import Spinner from "@/app/components/Spinner";
 
 const SettingsPage = () => {
   const [fullName, setFullName] = useState("");
