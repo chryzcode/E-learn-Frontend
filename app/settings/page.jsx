@@ -6,7 +6,7 @@ import withAuth from "../utils/WithAuth";
 import { useRouter } from "next/navigation";
 import Spinner from "../components/Spinner";
 
-const settingsPage = () => {
+const SettingsPage = () => {
   const [fullName, setFullName] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [password, setPassword] = useState("");
@@ -15,7 +15,7 @@ const settingsPage = () => {
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
   const router = useRouter();
 
-  const { user } = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -75,6 +75,15 @@ const settingsPage = () => {
         toast.error(errorMessage);
         throw new Error(errorMessage);
       }
+
+      // Update local storage with the updated user data
+      const updatedUser = {
+        ...user,
+        fullName: data.user.fullName,
+        avatar: data.user.avatar,
+      };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
       toast.success("Profile updated successfully!");
       router.push("/");
     } catch (error) {
@@ -104,7 +113,7 @@ const settingsPage = () => {
 
       localStorage.removeItem("user");
       toast.success("Deactivated account successfully!");
-      router.push("/");
+
     } catch (error) {
       toast.error(error.message || "Deactivating account failed");
     } finally {
@@ -197,4 +206,4 @@ const settingsPage = () => {
   );
 };
 
-export default withAuth(settingsPage);
+export default withAuth(SettingsPage);
