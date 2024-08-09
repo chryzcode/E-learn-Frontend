@@ -1,20 +1,23 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation"; // Use next/navigation for useRouter in App Router
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import Spinner from "../components/Spinner";
 
 const SignUpPage = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [userType, setUserType] = useState("Student");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
 
   const handleSubmit = async e => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const response = await fetch(`${BACKEND_URL}/auth/signup`, {
@@ -33,10 +36,12 @@ const SignUpPage = () => {
         toast.error(errorMessage);
         throw new Error(errorMessage);
       }
-      toast.success("Check mail for vefification!");
+      toast.success("Check mail for verification!");
       router.push("/auth/sign-in");
     } catch (error) {
       toast.error("Sign-up failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -50,7 +55,7 @@ const SignUpPage = () => {
         </a>
       </p>
       <div className="flex-wrap-container py-5 align-middle px-2 md:px-10">
-        <div className="border border-gray-300  p-4 md:p-6 shadow-lg mx-auto max-w-md">
+        <div className="border border-gray-300 p-4 md:p-6 shadow-lg mx-auto max-w-md">
           <form className="" onSubmit={handleSubmit}>
             <div className="my-3">
               <label htmlFor="fullName" className="block mb-2 text-sm">
@@ -132,6 +137,7 @@ const SignUpPage = () => {
           </form>
         </div>
       </div>
+      {loading && <Spinner />}
     </div>
   );
 };

@@ -4,11 +4,13 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import withAuth from "../utils/WithAuth";
 import { useRouter } from "next/navigation";
+import Spinner from "../components/Spinner";
 
 const settingsPage = () => {
   const [fullName, setFullName] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
   const router = useRouter();
@@ -17,12 +19,13 @@ const settingsPage = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
+      setLoading(true);
       try {
         const response = await fetch(`${BACKEND_URL}/current-user`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`, // Assuming token is stored in localStorage
+            Authorization: `Bearer ${user.token}`,
           },
         });
 
@@ -35,9 +38,10 @@ const settingsPage = () => {
         }
 
         setFullName(data.user.fullName);
-        // Set other fields as needed
       } catch (error) {
         toast.error(error.message || "Failed to fetch user data");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -46,17 +50,20 @@ const settingsPage = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const formData = new FormData();
       formData.append("fullName", fullName);
       formData.append("avatar", avatar);
-      formData.append("password", password);
+      if (password.length > 0) {
+        formData.append("password", password);
+      }
 
       const response = await fetch(`${BACKEND_URL}/update`, {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${user.token}`, // Assuming token is stored in localStorage
+          Authorization: `Bearer ${user.token}`,
         },
         body: formData,
       });
@@ -72,10 +79,13 @@ const settingsPage = () => {
       router.push("/");
     } catch (error) {
       toast.error("Update failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   const deactivateUser = async () => {
+    setLoading(true);
     try {
       const res = await fetch(`${BACKEND_URL}/delete`, {
         method: "DELETE",
@@ -92,12 +102,13 @@ const settingsPage = () => {
         throw new Error(errorMessage);
       }
 
-      // Clear user data from local storage and redirect to base route
       localStorage.removeItem("user");
       toast.success("Deactivated account successfully!");
       router.push("/");
     } catch (error) {
       toast.error(error.message || "Deactivating account failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -180,6 +191,8 @@ const settingsPage = () => {
           </div>
         </div>
       </div>
+
+      {loading && <Spinner />}
     </div>
   );
 };

@@ -5,10 +5,12 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // Use next/navigation for useRouter in App Router
 import { toast } from "react-toastify";
 import { useAuthDispatch } from "@/app/utils/AuthContext";
+import Spinner from "../components/Spinner"; // Import the Spinner component
 
 const SignInPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); // Manage loading state
   const dispatch = useAuthDispatch();
   const router = useRouter();
 
@@ -16,6 +18,7 @@ const SignInPage = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    setLoading(true); // Set loading to true when the form is submitted
 
     try {
       const response = await fetch(`${BACKEND_URL}/auth/signin`, {
@@ -39,6 +42,8 @@ const SignInPage = () => {
       router.push("/");
     } catch (error) {
       toast.error("Sign-in failed");
+    } finally {
+      setLoading(false); // Set loading to false when the request is completed
     }
   };
 
@@ -106,6 +111,7 @@ const SignInPage = () => {
           </div>
         </div>
       </div>
+      {loading && <Spinner />} {/* Conditionally render the spinner */}
     </div>
   );
 };
