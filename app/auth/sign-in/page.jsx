@@ -29,7 +29,8 @@ const SignInPage = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.msg || "Sign-in failed";
+        const errorMessage = data.msg || data.error || "Sign-in failed";
+        toast.error(errorMessage);
         throw new Error(errorMessage);
       }
 

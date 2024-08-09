@@ -12,25 +12,28 @@ const forgotPasswordPage = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    try {
+      const response = await fetch(`${BACKEND_URL}/send-forgot-password-link`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
 
-    const response = await fetch(`${BACKEND_URL}/send-forgot-password-link`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email }),
-    });
+      const data = await response.json();
 
-    const data = await response.json();
+      if (!response.ok) {
+        const errorMessage = data.msg || data.error || "Forgot password failed";
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
+      }
 
-    if (!response.ok) {
-      const errorMessage = data.msg || "Forgot password failed";
-      toast.error(errorMessage);
-      throw new Error(errorMessage);
+      toast.success("Check your mail!");
+      router.push("/auth/sign-in");
+    } catch (error) {
+      console.log("Forgot password failed");
     }
-
-    toast.success("Check your mail!");
-    router.push("/auth/sign-in");
   };
   return (
     <div className="mx-4 md:mx-10">

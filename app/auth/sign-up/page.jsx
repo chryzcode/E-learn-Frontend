@@ -29,14 +29,14 @@ const SignUpPage = () => {
       console.log(data.msg);
 
       if (!response.ok) {
-        const errorMessage = data.msg || "Sign-up failed";
-        toast.error(data.msg || "Sign-up failed");
+        const errorMessage = data.msg || data.error || "Sign-up failed";
+        toast.error(errorMessage);
         throw new Error(errorMessage);
       }
       toast.success("Check mail for vefification!");
       router.push("/auth/sign-in");
     } catch (error) {
-      toast.error(error || "Sign-up failed");
+      toast.error("Sign-up failed");
     }
   };
 
