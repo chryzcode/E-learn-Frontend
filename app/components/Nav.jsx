@@ -129,6 +129,15 @@ const Nav = () => {
           <nav
             ref={mobileMenuRef}
             className="md:hidden absolute top-16 left-0 text-center right-0 bg-white border-t border-gray-300 shadow-lg z-10 flex flex-col">
+            {user && user.user.userType == "Instructor" ? (
+              <Link
+                href="/instructor/create"
+                className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
+                onClick={() => setMobileMenuOpen(false)}>
+                Create
+              </Link>
+            ) : null}
+
             <Link
               href="/"
               className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
