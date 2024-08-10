@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Spinner from "@/app/components/Spinner";
@@ -13,6 +13,7 @@ const CreateCoursePage = () => {
   const [category, setCategory] = useState("");
   const [video, setVideo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [allCategories, setAllCategories] = useState([]);
 
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com"; // Replace with your backend URL
   const router = useRouter();
@@ -20,11 +21,38 @@ const CreateCoursePage = () => {
 
   // Properly log the user object
 
-  console.log("User:", user);
-
   const handleVideoUpload = e => {
     setVideo(e.target.files[0]);
   };
+
+  useEffect(() => {
+    const getCourseCategories = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`${BACKEND_URL}/course/categories`, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          const errorMessage = data.msg || data.error || "Failed to fetch course categories";
+          toast.error(errorMessage);
+          throw new Error(errorMessage);
+        }
+
+        setAllCategories(data.categories);
+        setLoading(false);
+      } catch (error) {
+        toast.error(error.message || "Failed to fetch course categories");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getCourseCategories();
+  }, []);
 
   /**
    * The function `handleSubmit` is an asynchronous function that handles form submission for creating a
@@ -68,7 +96,7 @@ const CreateCoursePage = () => {
 
   return (
     <div className="mx-4 md:mx-10">
-      <p className="text-2xl text-customPurple font-semibold mx-auto text-center py-5 md:py-7">Create a New Course</p>
+      <p className="text-2xl text-customPurple font-semibold mx-auto text-center py-5 md:py-7">Create Course</p>
 
       <div className="flex-wrap-container py-5 align-middle px-2 md:px-10">
         <div className="p-4 md:p-6 mx-auto max-w-md">
@@ -116,11 +144,9 @@ const CreateCoursePage = () => {
                 onChange={e => setCategory(e.target.value)}
                 className="border w-full py-2 px-3 mb-2"
                 required>
-                <option value="">Select a category</option>
-                <option value="technology">Technology</option>
-                <option value="business">Business</option>
-                <option value="art">Art</option>
-                <option value="science">Science</option>
+                {allCategories.map(aCategory => (
+                  <option value={aCategory.name}>{aCategory.name}</option>
+                ))}
               </select>
             </div>
 
