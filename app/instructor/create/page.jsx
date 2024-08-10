@@ -4,8 +4,7 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Spinner from "@/app/components/Spinner";
-import withAuth from "@/app/utils/withAuth";
-import { useAuthState } from "@/app/utils/AuthContext";
+import WithAuth from "@/app/utils/WithAuth";
 
 const CreateCoursePage = () => {
   const [title, setTitle] = useState("");
@@ -184,4 +183,4 @@ const CreateCoursePage = () => {
   );
 };
 
-export default withAuth(CreateCoursePage);
+export default WithAuth(CreateCoursePage);
