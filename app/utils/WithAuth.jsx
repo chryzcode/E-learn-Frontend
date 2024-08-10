@@ -7,9 +7,6 @@ const WithAuth = WrappedComponent => {
   return props => {
     const { user, loading } = useAuthState();
     const router = useRouter();
-
-    console.log("withAuth: user", user, "loading", loading);
-
     useEffect(() => {
       if (!loading && !user) {
         router.push("/"); // Redirect to login page or any other path
