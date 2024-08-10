@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Spinner from "@/app/components/Spinner";
 import withAuth from "@/app/utils/withAuth";
-import { useAuthState } from "@/app/utils/AuthContext";
 
 const CreateCoursePage = () => {
   const [title, setTitle] = useState("");
