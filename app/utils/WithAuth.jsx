@@ -1,20 +1,27 @@
-import { useAuthState } from "./AuthContext";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthState } from "@/app/utils/AuthContext";
+import Spinner from "@/app/components/Spinner";
 
 const withAuth = WrappedComponent => {
   return props => {
-    const { user } = useAuthState();
+    const { user, loading } = useAuthState();
     const router = useRouter();
 
+    console.log("withAuth: user", user, "loading", loading);
+
     useEffect(() => {
-      if (!user) {
-        router.push("/"); // Adjust the login path as needed
+      if (!loading && !user) {
+        router.push("/"); // Redirect to login page or any other path
       }
-    }, [user, router]);
+    }, [user, loading, router]);
+
+    if (loading) {
+      return <Spinner />; // Display spinner while loading
+    }
 
     if (!user) {
-      return null; // Or you can return a loading spinner while redirecting
+      return null; // Optionally, return null or a different component while redirecting
     }
 
     return <WrappedComponent {...props} />;

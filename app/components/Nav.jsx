@@ -68,6 +68,7 @@ const Nav = () => {
           </Link>
         </div>
         <nav className="hidden md:flex flex-1 justify-center text-base space-x-6">
+          {user && user.user.userType == "Instructor" ? <Link href="/instructor/create">Create</Link> : null}
           <Link href="/">Explore</Link>
         </nav>
         <div className="hidden md:flex flex-1 justify-end items-center space-x-6">
@@ -80,6 +81,9 @@ const Nav = () => {
                 <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded">
                   <Link href="/my-courses" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     My Courses
+                  </Link>
+                  <Link href="/my-courses" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    My WishList
                   </Link>
                   <Link href="/my-account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     My Account
@@ -125,6 +129,15 @@ const Nav = () => {
           <nav
             ref={mobileMenuRef}
             className="md:hidden absolute top-16 left-0 text-center right-0 bg-white border-t border-gray-300 shadow-lg z-10 flex flex-col">
+            {user && user.user.userType == "Instructor" ? (
+              <Link
+                href="/instructor/create"
+                className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
+                onClick={() => setMobileMenuOpen(false)}>
+                Create
+              </Link>
+            ) : null}
+
             <Link
               href="/"
               className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
@@ -138,6 +151,12 @@ const Nav = () => {
                   className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
                   onClick={() => setMobileMenuOpen(false)}>
                   My Courses
+                </Link>
+                <Link
+                  href=""
+                  className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
+                  onClick={() => setMobileMenuOpen(false)}>
+                  My WishList
                 </Link>
                 <Link
                   href="/my-account"

@@ -12,12 +12,19 @@ const authReducer = (state, action) => {
       return {
         ...state,
         user: action.payload,
+        loading: false,
       };
     case "LOGOUT":
       localStorage.removeItem("user");
       return {
         ...state,
         user: null,
+        loading: false,
+      };
+    case "SET_LOADING":
+      return {
+        ...state,
+        loading: true,
       };
     default:
       throw new Error(`Unknown action: ${action.type}`);
@@ -25,12 +32,20 @@ const authReducer = (state, action) => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, { user: null });
+  const [state, dispatch] = useReducer(authReducer, { user: null, loading: true });
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user) {
-      dispatch({ type: "LOGIN", payload: user });
+    dispatch({ type: "SET_LOADING" });
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (user) {
+        dispatch({ type: "LOGIN", payload: user });
+      } else {
+        dispatch({ type: "SET_LOADING" }); // Set loading to false if no user is found
+      }
+    } catch (error) {
+      console.error("Failed to parse user from localStorage", error);
+      dispatch({ type: "SET_LOADING" }); // Ensure loading is turned off in case of error
     }
   }, []);
 

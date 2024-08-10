@@ -127,9 +127,9 @@ const SignUpPage = () => {
               />
             </div>
 
-            <div className="mx-auto w-24 md:w-32 my-6 md:my-8 text-center">
+            <div className="flex justify-center my-6 md:my-8">
               <button
-                className="bg-black text-white font-bold py-2 px-4 focus:outline-none focus:shadow-outline w-full md:w-auto transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black"
+                className="bg-black text-white font-bold py-2 px-8 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black"
                 type="submit">
                 Sign Up
               </button>
