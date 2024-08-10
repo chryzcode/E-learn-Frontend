@@ -69,7 +69,7 @@ const CreateCoursePage = () => {
       formData.append("category", category);
       formData.append("video", video);
 
-      const response = await fetch(`${BACKEND_URL}/create-course`, {
+      const response = await fetch(`${BACKEND_URL}/course`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${user.token}`, // Include authorization header
@@ -144,8 +144,11 @@ const CreateCoursePage = () => {
                 onChange={e => setCategory(e.target.value)}
                 className="border w-full py-2 px-3 mb-2"
                 required>
+                <option value="">Select a category</option>
                 {allCategories.map(aCategory => (
-                  <option value={aCategory.name}>{aCategory.name}</option>
+                  <option value={aCategory.name} key={aCategory._id}>
+                    {aCategory.name}
+                  </option>
                 ))}
               </select>
             </div>
