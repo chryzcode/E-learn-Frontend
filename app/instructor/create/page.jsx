@@ -96,7 +96,7 @@ const CreateCoursePage = () => {
 
   return (
     <div className="mx-4 md:mx-10">
-      <p className="text-2xl text-customPurple font-semibold mx-auto text-center py-5 md:py-7">Create Course</p>
+      <p className="text-2xl text-customPurple font-semibold mx-auto text-center py-5 md:py-7">Create</p>
 
       <div className="flex-wrap-container py-5 align-middle px-2 md:px-10">
         <div className="p-4 md:p-6 mx-auto max-w-md">
@@ -172,7 +172,7 @@ const CreateCoursePage = () => {
               <button
                 className="bg-black text-white font-bold py-2 px-8 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black"
                 type="submit">
-                Create Course
+                Publish
               </button>
             </div>
           </form>
