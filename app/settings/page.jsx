@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import withAuth from "../utils/WithAuth";
+import WithAuth from "../utils/WithAuth";
 import { useRouter } from "next/navigation";
 import Spinner from "@/app/components/Spinner";
 
@@ -205,4 +205,4 @@ const SettingsPage = () => {
   );
 };
 
-export default withAuth(SettingsPage);
+export default WithAuth(SettingsPage);

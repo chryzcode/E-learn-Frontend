@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useAuthState } from "@/app/utils/AuthContext";
 import Spinner from "@/app/components/Spinner";
 
-const withAuth = WrappedComponent => {
+const WithAuth = WrappedComponent => {
   return props => {
     const { user, loading } = useAuthState();
     const router = useRouter();
@@ -28,4 +28,4 @@ const withAuth = WrappedComponent => {
   };
 };
 
-export default withAuth;
+export default WithAuth;
