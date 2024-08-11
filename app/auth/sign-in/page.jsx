@@ -39,7 +39,7 @@ const SignInPage = () => {
 
       dispatch({ type: "LOGIN", payload: data });
       toast.success("Sign-in successful!");
-      router.push("/");
+      router.push("/course");
     } catch (error) {
       toast.error("Sign-in failed");
     } finally {
