@@ -7,8 +7,8 @@ import Spinner from "@/app/components/Spinner";
 const AllCoursesPage = () => {
   const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-    const router = useRouter();
-    const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
+  const router = useRouter();
+  const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
 
   useEffect(() => {
     fetchCourses();
@@ -31,7 +31,7 @@ const AllCoursesPage = () => {
   }
 
   if (!courses.length) {
-    return <div>No courses available</div>;
+    return <div className="flex items-center justify-center min-h-screen text-2xl">No courses available</div>;
   }
 
   return (

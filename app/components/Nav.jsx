@@ -69,6 +69,7 @@ const Nav = () => {
         </div>
         <nav className="hidden md:flex flex-1 justify-center text-base space-x-6">
           {user && user.user.userType == "Instructor" ? <Link href="/instructor/create">Create</Link> : null}
+          <Link href="/course">Courses</Link>
           <Link href="/">Explore</Link>
         </nav>
         <div className="hidden md:flex flex-1 justify-end items-center space-x-6">
@@ -137,7 +138,12 @@ const Nav = () => {
                 Create
               </Link>
             ) : null}
-
+            <Link
+              href="/course"
+              className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
+              onClick={() => setMobileMenuOpen(false)}>
+              Courses
+            </Link>
             <Link
               href="/"
               className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
@@ -199,7 +205,7 @@ const Nav = () => {
           </nav>
         )}
       </header>
-      <main className="pt-20">{/* Your page content goes here */}</main>
+      <main className="pt-24">{/* Your page content goes here */}</main>
     </>
   );
 };
