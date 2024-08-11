@@ -12,9 +12,11 @@ const CourseDetailPage = ({ params }) => {
   const [course, setCourse] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
+
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/login");
+      router.push("/login"); // Redirect to login if not authenticated
     } else {
       fetchCourse();
     }
@@ -22,7 +24,7 @@ const CourseDetailPage = ({ params }) => {
 
   const fetchCourse = async () => {
     try {
-      const response = await fetch(`https://your-backend-url.com/courses/${id}`);
+      const response = await fetch(`${BACKEND_URL}/course/detail/${id}`);
       const data = await response.json();
       setCourse(data);
       setIsLoading(false);
@@ -37,7 +39,7 @@ const CourseDetailPage = ({ params }) => {
   }
 
   if (!course) {
-    <div className="flex items-center justify-center min-h-screen text-2xl">Course not found</div>;
+    return <div className="flex items-center justify-center min-h-screen text-2xl">Course not found</div>;
   }
 
   return (
@@ -45,7 +47,6 @@ const CourseDetailPage = ({ params }) => {
       <div className="course-header">
         <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
         <p className="text-xl text-gray-700">{course.description}</p>
-        {course.thumbnail && <img src={course.thumbnail} alt={course.title} className="my-4 w-full max-w-lg mx-auto" />}
       </div>
 
       <div className="course-details my-6">
@@ -53,10 +54,10 @@ const CourseDetailPage = ({ params }) => {
           <strong>Price:</strong> ${course.price}
         </div>
         <div className="text-lg">
-          <strong>Category:</strong> {course.category.name}
+          <strong>Category:</strong> {course.category}
         </div>
         <div className="text-lg">
-          <strong>Instructor:</strong> {course.instructor.fullName} ({course.instructor.userType})
+          <strong>Instructor:</strong> {course.instructor.fullName}
         </div>
       </div>
 

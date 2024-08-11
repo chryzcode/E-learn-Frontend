@@ -85,7 +85,7 @@ const CreateCoursePage = () => {
       }
 
       toast.success("Course created successfully!");
-      router.push("/");
+      router.push(`/course/${data.course._id}`);
     } catch (error) {
       toast.error("Course creation failed");
     } finally {
@@ -143,7 +143,6 @@ const CreateCoursePage = () => {
                 onChange={e => setPrice(e.target.value)}
                 className="border w-full py-2 px-3 mb-2"
                 placeholder="Price"
-            
               />
             </div>
 
