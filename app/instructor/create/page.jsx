@@ -11,17 +11,20 @@ const CreateCoursePage = () => {
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
   const [video, setVideo] = useState(null);
+  const [thumbnail, setThumbnail] = useState(null);
   const [loading, setLoading] = useState(false);
   const [allCategories, setAllCategories] = useState([]);
 
-  const BACKEND_URL = "https://e-learn-l8dr.onrender.com"; // Replace with your backend URL
+  const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
   const router = useRouter();
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // Properly log the user object
-
   const handleVideoUpload = e => {
     setVideo(e.target.files[0]);
+  };
+
+  const handleThumbnailUpload = e => {
+    setThumbnail(e.target.files[0]);
   };
 
   useEffect(() => {
@@ -53,10 +56,6 @@ const CreateCoursePage = () => {
     getCourseCategories();
   }, []);
 
-  /**
-   * The function `handleSubmit` is an asynchronous function that handles form submission for creating a
-   * course by sending a POST request to a backend API endpoint.
-   */
   const handleSubmit = async e => {
     e.preventDefault();
     setLoading(true);
@@ -67,6 +66,7 @@ const CreateCoursePage = () => {
       formData.append("price", price);
       formData.append("category", category);
       formData.append("video", video);
+      formData.append("thumbnail", thumbnail);
 
       const response = await fetch(`${BACKEND_URL}/course`, {
         method: "POST",
@@ -117,8 +117,23 @@ const CreateCoursePage = () => {
             </div>
 
             <div className="my-3">
+              <label htmlFor="thumbnail" className="block mb-2 text-sm">
+                Thumbnail
+              </label>
+              <input
+                type="file"
+                id="thumbnail"
+                name="thumbnail"
+                accept="image/*"
+                onChange={handleThumbnailUpload}
+                className="border w-full py-2 px-3 mb-2"
+                required
+              />
+            </div>
+
+            <div className="my-3">
               <label htmlFor="price" className="block mb-2 text-sm">
-                Price
+                Price <small className="text-gray-500">(optional)</small>
               </label>
               <input
                 type="number"
@@ -128,7 +143,7 @@ const CreateCoursePage = () => {
                 onChange={e => setPrice(e.target.value)}
                 className="border w-full py-2 px-3 mb-2"
                 placeholder="Price"
-                required
+            
               />
             </div>
 
