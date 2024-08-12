@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useAuthState } from "@/app/utils/AuthContext";
 import Spinner from "@/app/components/Spinner";
+import { formatDistanceToNow } from "date-fns";
 
 const CourseDetailPage = ({ params }) => {
   const { courseId } = params;
@@ -100,21 +101,27 @@ const CourseDetailPage = ({ params }) => {
         </div>
         <div className="p-6">
           <h1 className="text-3xl font-bold text-gray-800 mb-4">{course.title}</h1>
-          <p className="text-lg text-gray-600 mb-4">{course.description || "No description available"}</p>
-          <div className="flex items-center mb-4">
-            <div className="text-gray-700">
-              <div className="text-lg mb-2">
+          <div className="text-sm text-gray-700 mb-4">
+            <div className="flex flex-wrap gap-4 mb-2">
+              <div>
                 <strong>Price:</strong>{" "}
                 {course.price ? `$${course.price}` : course.free ? "Free" : "Price not available"}
               </div>
-              <div className="text-lg mb-2">
+              <div>
                 <strong>Category:</strong> {course.category.name}
               </div>
-              <div className="text-lg">
-                <strong>Instructor:</strong> {course.instructor.fullName || course.instructor}
+              <div>
+                <strong>Instructor:</strong>{" "}
+                <a href={`/instructor/${course.instructor._id}`} className=" hover:underline">
+                  {course.instructor.fullName || course.instructor}
+                </a>
               </div>
             </div>
+            <div className="text-xs text-gray-500">
+              <strong>Created:</strong> {formatDistanceToNow(new Date(course.createdAt), { addSuffix: true })}
+            </div>
           </div>
+          <p className="text-lg text-gray-600 mb-4">{course.description || "No description available"}</p>
         </div>
       </div>
     </div>
