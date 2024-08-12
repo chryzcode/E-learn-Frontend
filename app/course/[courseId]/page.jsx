@@ -71,7 +71,7 @@ const CourseDetailPage = ({ params }) => {
     event.preventDefault();
   };
 
-  if ( isLoading) {
+  if (isLoading) {
     return <Spinner />;
   }
 
@@ -87,32 +87,38 @@ const CourseDetailPage = ({ params }) => {
     <div className="container mx-auto px-4 py-8">
       <div className="course-details bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="relative">
-          {hasAccess ? (
-            <video
-              ref={videoRef}
-              controls
-              controlsList="nodownload"
-              className="w-full h-64 md:h-96 object-contain"
-              onPlay={handleVideoPlay}
-              onContextMenu={handleContextMenu}
-              onTouchStart={handleTouchStart}
-              preload="metadata"
-              disablePictureInPicture>
-              <source src={video + `?authToken=${user ? user.token : ""}`} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          ) : (
-            <div className="w-full h-64 md:h-96 bg-gray-200 flex items-center justify-center text-gray-400">
-              Video not available
-            </div>
-          )}
+          <video
+            ref={videoRef}
+            controls
+            controlsList="nodownload"
+            className="w-full h-64 md:h-96 object-contain"
+            onPlay={handleVideoPlay}
+            onContextMenu={handleContextMenu}
+            onTouchStart={handleTouchStart}
+            preload="metadata"
+            disablePictureInPicture>
+            <source src={video + `?authToken=${user ? user.token : ""}`} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
         </div>
         <div className="p-6">
+          <div className="flex justify-end my-4">
+            {hasAccess ? (
+              <div className="bg-black text-white font-bold py-2 px-8 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
+                ChatRoom{" "}
+              </div>
+            ) : (
+              <div className="bg-black text-white font-bold py-2 px-8 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
+                Pay{" "}
+              </div>
+            )}
+          </div>
           <h1 className="text-3xl font-bold text-gray-800 mb-4">{title}</h1>
+
           <div className="text-sm text-gray-700 mb-4">
             <div className="flex flex-wrap gap-4 mb-2">
               <div>
-                <strong>Price:</strong> {price ? `$${price}` : "Price not available"}
+                <strong>Price:</strong> {price ? `$${price}` : "Free"}
               </div>
               <div>
                 <strong>Category:</strong> {category ? category.name : "Category not available"}
@@ -128,7 +134,7 @@ const CourseDetailPage = ({ params }) => {
               <strong>Created:</strong> {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
             </div>
           </div>
-          <p className="text-lg text-gray-600 mb-4">{description || "No description available"}</p>
+          <p className="text-base text-gray-600 mb-4">{description || "No description available"}</p>
         </div>
       </div>
     </div>

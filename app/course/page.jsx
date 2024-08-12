@@ -55,8 +55,6 @@ const AllCoursesPage = () => {
             ) : null}
             <div className="p-3 flex-1 flex flex-col">
               <h2 className="text-xl font-semibold mb-2">{course.title}</h2>
-              <p className="text-sm text-gray-700 mb-2 flex-1 overflow-hidden">{course.description}</p>
-
               <div className="text-sm mb-1">
                 <strong>Instructor:</strong>{" "}
                 <a href={`/instructor/${course.instructor._id}`} className="hover:underline">
