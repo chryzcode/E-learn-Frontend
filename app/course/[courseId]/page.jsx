@@ -1,14 +1,16 @@
-"use client";
+"use client"; // Add this at the top of the file
+
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useAuthState } from "@/app/utils/AuthContext";
 import Spinner from "@/app/components/Spinner";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 
 const CourseDetailPage = ({ params }) => {
   const { courseId } = params;
-  const { user, loading } = useAuthState();
+  const { user, loading: authLoading } = useAuthState();
   const router = useRouter();
   const [course, setCourse] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -19,7 +21,7 @@ const CourseDetailPage = ({ params }) => {
 
   useEffect(() => {
     fetchCourse();
-  }, [user, loading, courseId]);
+  }, [courseId]);
 
   const fetchCourse = async () => {
     try {
@@ -28,7 +30,7 @@ const CourseDetailPage = ({ params }) => {
       const response = await fetch(`${BACKEND_URL}/course/detail/${courseId}`, {
         method: "GET",
         headers: {
-          Authorization: user ? `Bearer ${user.token}` : "",
+          Authorization: user && user.token ? `Bearer ${user.token}` : "",
         },
       });
 
@@ -37,6 +39,7 @@ const CourseDetailPage = ({ params }) => {
       }
 
       const data = await response.json();
+
       if (data.access) {
         setCourse(data.access);
         setHasAccess(true);
@@ -49,6 +52,7 @@ const CourseDetailPage = ({ params }) => {
       setCourse(null);
     } finally {
       setIsLoading(false);
+      console.log("Finished fetching course data");
     }
   };
 
@@ -67,13 +71,17 @@ const CourseDetailPage = ({ params }) => {
     event.preventDefault();
   };
 
-  if (loading || isLoading) {
+  if ( isLoading) {
     return <Spinner />;
   }
 
   if (!course) {
     return <div className="flex items-center justify-center min-h-screen text-2xl">Course not found</div>;
   }
+
+  const { title, price, category, instructor, createdAt, description, video } = course;
+  const instructorName = instructor ? instructor.fullName || instructor.name : "Unknown Instructor";
+  const instructorId = instructor ? instructor._id : "#";
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -90,7 +98,7 @@ const CourseDetailPage = ({ params }) => {
               onTouchStart={handleTouchStart}
               preload="metadata"
               disablePictureInPicture>
-              <source src={course.video + `?authToken=${user.token}`} type="video/mp4" />
+              <source src={video + `?authToken=${user ? user.token : ""}`} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           ) : (
@@ -100,28 +108,27 @@ const CourseDetailPage = ({ params }) => {
           )}
         </div>
         <div className="p-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">{course.title}</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-4">{title}</h1>
           <div className="text-sm text-gray-700 mb-4">
             <div className="flex flex-wrap gap-4 mb-2">
               <div>
-                <strong>Price:</strong>{" "}
-                {course.price ? `$${course.price}` : course.free ? "Free" : "Price not available"}
+                <strong>Price:</strong> {price ? `$${price}` : "Price not available"}
               </div>
               <div>
-                <strong>Category:</strong> {course.category.name}
+                <strong>Category:</strong> {category ? category.name : "Category not available"}
               </div>
               <div>
                 <strong>Instructor:</strong>{" "}
-                <a href={`/instructor/${course.instructor._id}`} className=" hover:underline">
-                  {course.instructor.fullName || course.instructor}
-                </a>
+                <Link href={`/instructor/${instructorId}`} className="hover:underline">
+                  {instructorName}
+                </Link>
               </div>
             </div>
             <div className="text-xs text-gray-500">
-              <strong>Created:</strong> {formatDistanceToNow(new Date(course.createdAt), { addSuffix: true })}
+              <strong>Created:</strong> {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
             </div>
           </div>
-          <p className="text-lg text-gray-600 mb-4">{course.description || "No description available"}</p>
+          <p className="text-lg text-gray-600 mb-4">{description || "No description available"}</p>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAuthState, useAuthDispatch } from "@/app/utils/AuthContext";
+import { HiChevronDown } from "react-icons/hi";
 
 const Nav = () => {
   const { user } = useAuthState();
@@ -75,15 +76,18 @@ const Nav = () => {
         <div className="hidden md:flex flex-1 justify-end items-center space-x-6">
           {user ? (
             <div className="relative" ref={dropdownRef}>
-              <button onClick={toggleDropdown} className="text-base py-2 px-4 rounded">
-                {user.user.fullName}
+              <button
+                onClick={toggleDropdown}
+                className="flex items-center space-x-2 text-base">
+                <span>{user.user.fullName}</span>
+                <HiChevronDown />
               </button>
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded">
                   <Link href="/my-courses" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     My Courses
                   </Link>
-                  <Link href="/my-courses" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <Link href="/my-wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     My WishList
                   </Link>
                   <Link href="/my-account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
@@ -108,14 +112,14 @@ const Nav = () => {
               <Link href="/auth/sign-in">Sign In</Link>
               <Link
                 href="/auth/sign-up"
-                className="bg-black text-white font-bold py-2 px-4 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black">
+                className="bg-black text-white font-bold py-2 px-4 shadow-md focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black">
                 Sign Up
               </Link>
             </>
           )}
         </div>
         <div className="md:hidden flex items-center">
-          <button onClick={toggleMobileMenu} className="focus:outline-none">
+          <button onClick={toggleMobileMenu} className="focus:outline-none shadow-md">
             <svg
               className="w-8 h-8"
               fill="none"
@@ -159,7 +163,7 @@ const Nav = () => {
                   My Courses
                 </Link>
                 <Link
-                  href=""
+                  href="/my-wishlist"
                   className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
                   onClick={() => setMobileMenuOpen(false)}>
                   My WishList
@@ -176,15 +180,14 @@ const Nav = () => {
                   onClick={() => setMobileMenuOpen(false)}>
                   Settings
                 </Link>
-                <Link
-                  href=""
+                <button
                   onClick={() => {
                     dispatch({ type: "LOGOUT" });
                     setMobileMenuOpen(false);
                   }}
-                  className="block px-4 py-4 text-base bg-black text-white font-bold focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black">
+                  className="block px-4 py-4 text-base bg-black text-white font-bold shadow-md focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black">
                   Logout
-                </Link>
+                </button>
               </>
             ) : (
               <>
@@ -196,7 +199,7 @@ const Nav = () => {
                 </Link>
                 <Link
                   href="/auth/sign-up"
-                  className="block px-4 py-4 text-base bg-black text-white font-bold focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black"
+                  className="block px-4 py-4 text-base bg-black text-white font-bold shadow-md focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black"
                   onClick={() => setMobileMenuOpen(false)}>
                   Sign Up
                 </Link>
