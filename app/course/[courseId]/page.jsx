@@ -10,11 +10,17 @@ import Link from "next/link";
 
 const CourseDetailPage = ({ params }) => {
   const { courseId } = params;
-  const { user, loading: authLoading } = useAuthState();
+  const { user } = useAuthState();
   const router = useRouter();
   const [course, setCourse] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
+  const [likes, setLikes] = useState(0);
+  const [comments, setComments] = useState([]);
+  const [displayedComments, setDisplayedComments] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [commentsToShow, setCommentsToShow] = useState(1); // Show only the first comment initially
+  const [moreCommentsAvailable, setMoreCommentsAvailable] = useState(false); // To check if more comments are available
   const videoRef = useRef(null);
 
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
@@ -43,6 +49,14 @@ const CourseDetailPage = ({ params }) => {
       if (data.access) {
         setCourse(data.access);
         setHasAccess(true);
+        setLikes(data.access.likes || 0);
+        setComments(data.access.comments || []);
+        setAverageRating(data.access.averageRating || 0);
+
+        // Initialize displayedComments with the first batch
+        const initialComments = data.access.comments.slice(0, commentsToShow);
+        setDisplayedComments(initialComments);
+        setMoreCommentsAvailable(data.access.comments.length > commentsToShow);
       } else {
         setCourse(data.noAccess);
         setHasAccess(false);
@@ -71,7 +85,14 @@ const CourseDetailPage = ({ params }) => {
     event.preventDefault();
   };
 
-  if ( isLoading) {
+  const loadMoreComments = () => {
+    const newCommentsToShow = commentsToShow + 5;
+    setCommentsToShow(newCommentsToShow);
+    setDisplayedComments(comments.slice(0, newCommentsToShow));
+    setMoreCommentsAvailable(comments.length > newCommentsToShow);
+  };
+
+  if (isLoading) {
     return <Spinner />;
   }
 
@@ -87,32 +108,38 @@ const CourseDetailPage = ({ params }) => {
     <div className="container mx-auto px-4 py-8">
       <div className="course-details bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="relative">
-          {hasAccess ? (
-            <video
-              ref={videoRef}
-              controls
-              controlsList="nodownload"
-              className="w-full h-64 md:h-96 object-contain"
-              onPlay={handleVideoPlay}
-              onContextMenu={handleContextMenu}
-              onTouchStart={handleTouchStart}
-              preload="metadata"
-              disablePictureInPicture>
-              <source src={video + `?authToken=${user ? user.token : ""}`} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          ) : (
-            <div className="w-full h-64 md:h-96 bg-gray-200 flex items-center justify-center text-gray-400">
-              Video not available
-            </div>
-          )}
+          <video
+            ref={videoRef}
+            controls
+            controlsList="nodownload"
+            className="w-full h-64 md:h-96 object-contain"
+            onPlay={handleVideoPlay}
+            onContextMenu={handleContextMenu}
+            onTouchStart={handleTouchStart}
+            preload="metadata"
+            disablePictureInPicture>
+            <source src={video} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
         </div>
         <div className="p-6">
+          <div className="flex justify-end my-4">
+            {hasAccess ? (
+              <div className="bg-black text-white font-bold py-2 px-8 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
+                ChatRoom
+              </div>
+            ) : (
+              <div className="bg-black text-white font-bold py-2 px-8 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
+                Pay
+              </div>
+            )}
+          </div>
           <h1 className="text-3xl font-bold text-gray-800 mb-4">{title}</h1>
+
           <div className="text-sm text-gray-700 mb-4">
             <div className="flex flex-wrap gap-4 mb-2">
               <div>
-                <strong>Price:</strong> {price ? `$${price}` : "Price not available"}
+                <strong>Price:</strong> {price ? `$${price}` : "Free"}
               </div>
               <div>
                 <strong>Category:</strong> {category ? category.name : "Category not available"}
@@ -124,11 +151,54 @@ const CourseDetailPage = ({ params }) => {
                 </Link>
               </div>
             </div>
-            <div className="text-xs text-gray-500">
+
+            <div className="flex flex-wrap gap-4 mb-2">
+              <div>
+                <strong>Likes:</strong> {likes} {likes > 1 ? "Likes" : "Like"}
+              </div>
+
+              <div>
+                <strong>Average Rating:</strong> {averageRating}
+              </div>
+            </div>
+            <div className="text-xs text-gray-500 my-5">
               <strong>Created:</strong> {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
             </div>
           </div>
-          <p className="text-lg text-gray-600 mb-4">{description || "No description available"}</p>
+          <p className="text-base text-gray-600 mb-4">{description || "No description available"}</p>
+
+          <div className="mt-9">
+            <h2 className="text-xl font-semibold mb-2">Comments</h2>
+            {displayedComments.length > 0 ? (
+              <div>
+                {displayedComments.map(comment => (
+                  <div key={comment._id} className="mb-5 py-4 px-2 shadow-lg rounded-lg">
+                    <div className="flex items-center mb-1">
+                      {comment.student.avatar && comment.student.avatar == null ? (
+                        <img
+                          src={comment.student.avatar}
+                          alt={comment.student.fullName}
+                          className="w-8 h-8 rounded-full mr-2"
+                        />
+                      ) : null}
+                      <span className="text-gray-800">{comment.student.fullName}</span>
+                    </div>
+                    <p className="text-gray-600 mb-2 mt-4 text-sm">{comment.comment}</p>
+                    <span className="text-xs text-gray-500">
+                      {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-600">No comments yet</p>
+            )}
+            {comments.length > 1 && comments.length > commentsToShow && (
+              <small onClick={loadMoreComments} className="hover:underline cursor-pointer">
+                View More
+              </small>
+            )}
+          </div>
         </div>
       </div>
     </div>

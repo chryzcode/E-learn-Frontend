@@ -12,6 +12,7 @@ const CreateCoursePage = () => {
   const [category, setCategory] = useState("");
   const [video, setVideo] = useState(null);
   const [thumbnail, setThumbnail] = useState(null);
+  const [description, setDescription] = useState(""); // New state for description
   const [loading, setLoading] = useState(false);
   const [allCategories, setAllCategories] = useState([]);
 
@@ -65,6 +66,7 @@ const CreateCoursePage = () => {
       formData.append("title", title);
       formData.append("price", price);
       formData.append("category", category);
+      formData.append("description", description); // Append description
       formData.append("video", video);
       formData.append("thumbnail", thumbnail);
 
@@ -167,6 +169,22 @@ const CreateCoursePage = () => {
             </div>
 
             <div className="my-3">
+              <label htmlFor="description" className="block mb-2 text-sm">
+                Description <small className="text-gray-500">(optional)</small>
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                className="border w-full py-2 px-3 mb-2"
+                placeholder="Course Description"
+                rows="4"
+                required
+              />
+            </div>
+
+            <div className="my-3">
               <label htmlFor="video" className="block mb-2 text-sm">
                 Video Upload
               </label>
@@ -198,3 +216,4 @@ const CreateCoursePage = () => {
 };
 
 export default WithAuth(CreateCoursePage);
+
