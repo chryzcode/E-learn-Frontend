@@ -10,6 +10,7 @@ const SettingsPage = () => {
   const [fullName, setFullName] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [password, setPassword] = useState("");
+  const [bio, setBio] = useState(""); // New state for bio
   const [loading, setLoading] = useState(false);
 
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
@@ -38,6 +39,7 @@ const SettingsPage = () => {
         }
 
         setFullName(data.user.fullName);
+        setBio(data.user.bio); // Set the bio field
       } catch (error) {
         toast.error(error.message || "Failed to fetch user data");
       } finally {
@@ -55,7 +57,10 @@ const SettingsPage = () => {
     try {
       const formData = new FormData();
       formData.append("fullName", fullName);
-      formData.append("avatar", avatar);
+      formData.append("bio", bio); // Append bio to form data
+      if (avatar) {
+        formData.append("avatar", avatar);
+      }
       if (password.length > 0) {
         formData.append("password", password);
       }
@@ -80,12 +85,13 @@ const SettingsPage = () => {
       const updatedUser = {
         ...user,
         fullName: data.user.fullName,
+        bio: data.user.bio, // Update bio in local storage
         avatar: data.user.avatar,
       };
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
       toast.success("Profile updated successfully!");
-      router.push("/");
+  
     } catch (error) {
       toast.error("Update failed");
     } finally {
@@ -142,12 +148,24 @@ const SettingsPage = () => {
                 id="fullName"
                 name="fullName"
                 value={fullName}
-                onChange={e => {
-                  setFullName(e.target.value);
-                }}
+                onChange={e => setFullName(e.target.value)}
                 className="border w-full py-2 px-3 mb-2"
                 placeholder="John Doe"
                 required
+              />
+            </div>
+
+            <div className="my-3">
+              <label htmlFor="bio" className="block mb-2 text-sm">
+                Bio
+              </label>
+              <textarea
+                id="bio"
+                name="bio"
+                value={bio}
+                onChange={e => setBio(e.target.value)}
+                className="border w-full py-2 px-3 mb-2"
+                placeholder="A short bio about yourself"
               />
             </div>
 
@@ -173,9 +191,7 @@ const SettingsPage = () => {
                 id="password"
                 name="password"
                 value={password}
-                onChange={e => {
-                  setPassword(e.target.value);
-                }}
+                onChange={e => setPassword(e.target.value)}
                 className="border w-full py-2 px-3 mb-2"
                 placeholder="*********"
               />
@@ -185,7 +201,7 @@ const SettingsPage = () => {
               <button
                 className="bg-black text-white font-bold py-2 px-8 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black"
                 type="submit">
-               Update
+                Update
               </button>
             </div>
           </form>

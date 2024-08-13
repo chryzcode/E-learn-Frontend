@@ -21,6 +21,9 @@ const CourseDetailPage = ({ params }) => {
   const [averageRating, setAverageRating] = useState(0);
   const [commentsToShow, setCommentsToShow] = useState(1); // Show only the first comment initially
   const [moreCommentsAvailable, setMoreCommentsAvailable] = useState(false); // To check if more comments are available
+  const [newComment, setNewComment] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingCommentText, setEditingCommentText] = useState("");
   const videoRef = useRef(null);
 
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
@@ -92,6 +95,88 @@ const CourseDetailPage = ({ params }) => {
     setMoreCommentsAvailable(comments.length > newCommentsToShow);
   };
 
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/course/comment/${courseId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: user && user.token`Bearer ${user.token}`,
+        },
+        body: JSON.stringify({
+          comment: newComment,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add comment");
+      }
+
+      const addedComment = await response.json();
+      setComments([addedComment, ...comments]);
+      setDisplayedComments([addedComment, ...displayedComments]);
+      setNewComment("");
+    } catch (error) {
+      console.error("Failed to add comment:", error);
+      toast.error("Failed to add comment");
+    }
+  };
+
+  const handleEditComment = async () => {
+    if (!editingCommentText.trim()) return;
+
+    try {
+      const response = await fetch(`${BACKEND_URL}course/${courseId}/comment/${editingCommentId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: user && user.token  `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({
+          comment: editingCommentText,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to edit comment");
+      }
+
+      const updatedComment = await response.json();
+      const updatedComments = comments.map(comment => (comment._id === editingCommentId ? updatedComment : comment));
+      setComments(updatedComments);
+      setDisplayedComments(updatedComments.slice(0, commentsToShow));
+      setEditingCommentId(null);
+      setEditingCommentText("");
+    } catch (error) {
+      console.error("Failed to edit comment:", error);
+      toast.error("Failed to edit comment");
+    }
+  };
+
+  const handleDeleteComment = async commentId => {
+    try {
+      const response = await fetch(`${BACKEND_URL}course/${courseId}/comment/${editingCommentId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: user && user.token `Bearer ${user.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete comment");
+      }
+
+      const updatedComments = comments.filter(comment => comment._id !== commentId);
+      setComments(updatedComments);
+      setDisplayedComments(updatedComments.slice(0, commentsToShow));
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
+      toast.error("Failed to delete comment");
+    }
+  };
+
   if (isLoading) {
     return <Spinner />;
   }
@@ -130,7 +215,7 @@ const CourseDetailPage = ({ params }) => {
               </div>
             ) : (
               <div className="bg-black text-white font-bold py-2 px-8 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
-                Pay
+                Enroll
               </div>
             )}
           </div>
@@ -167,40 +252,85 @@ const CourseDetailPage = ({ params }) => {
           </div>
           <p className="text-base text-gray-600 mb-4">{description || "No description available"}</p>
 
-          <div className="mt-9">
-            <h2 className="text-xl font-semibold mb-2">Comments</h2>
-            {displayedComments.length > 0 ? (
-              <div>
-                {displayedComments.map(comment => (
-                  <div key={comment._id} className="mb-5 py-4 px-2 shadow-lg rounded-lg">
-                    <div className="flex items-center mb-1">
-                      {comment.student.avatar && comment.student.avatar == null ? (
-                        <img
-                          src={comment.student.avatar}
-                          alt={comment.student.fullName}
-                          className="w-8 h-8 rounded-full mr-2"
-                        />
-                      ) : null}
-                      <span className="text-gray-800">{comment.student.fullName}</span>
-                    </div>
-                    <p className="text-gray-600 mb-2 mt-4 text-sm">{comment.comment}</p>
-                    <span className="text-xs text-gray-500">
-                      {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
-                    </span>
-                  </div>
-                ))}
+          <div className="mt-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Comments</h2>
+            {user && (
+              <div className="mb-6">
+                <textarea
+                  className="w-full p-2 border rounded-md"
+                  rows="3"
+                  placeholder="Add a comment"
+                  value={newComment}
+                  onChange={e => setNewComment(e.target.value)}
+                />
+                <button
+                  className="bg-black text-white py-2 px-8 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base mt-3"
+                  onClick={handleAddComment}>
+                  Post
+                </button>
               </div>
-            ) : (
-              <p className="text-gray-600">No comments yet</p>
             )}
-            {comments.length > 1 && comments.length > commentsToShow && (
-              <small onClick={loadMoreComments} className="hover:underline cursor-pointer">
+
+            {displayedComments.map(comment => (
+              <div key={comment._id} className="mb-4 p-4 border rounded-md">
+                <p className="text-sm text-gray-600">
+                  <strong>{comment.student.fullName}:</strong> {comment.comment}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                </p>
+
+                {user && user._id === comment.student._id && (
+                  <div className="mt-2 flex space-x-2">
+                    <button
+                      className="text-blue-500 hover:underline"
+                      onClick={() => {
+                        setEditingCommentId(comment._id);
+                        setEditingCommentText(comment.comment);
+                      }}>
+                      Edit
+                    </button>
+                    <button className="text-red-500 hover:underline" onClick={() => handleDeleteComment(comment._id)}>
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+            {moreCommentsAvailable && (
+              <small className=" hover:underline mt-2 cursor-pointer" onClick={loadMoreComments}>
                 View More
               </small>
             )}
           </div>
         </div>
       </div>
+
+      {editingCommentId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-md">
+            <h3 className="text-lg font-bold mb-4">Edit Comment</h3>
+            <textarea
+              className="w-full p-2 border rounded-md"
+              rows="3"
+              value={editingCommentText}
+              onChange={e => setEditingCommentText(e.target.value)}
+            />
+            <div className="mt-4 flex justify-end space-x-2">
+              <button
+                className="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded hover:bg-gray-400"
+                onClick={() => setEditingCommentId(null)}>
+                Cancel
+              </button>
+              <button
+                className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
+                onClick={handleEditComment}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
