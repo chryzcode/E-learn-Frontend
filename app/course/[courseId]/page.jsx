@@ -132,7 +132,7 @@ const CourseDetailPage = ({ params }) => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: user && user.token  `Bearer ${user.token}`,
+          Authorization: user && user.token`Bearer ${user.token}`,
         },
         body: JSON.stringify({
           comment: editingCommentText,
@@ -160,7 +160,7 @@ const CourseDetailPage = ({ params }) => {
       const response = await fetch(`${BACKEND_URL}course/${courseId}/comment/${editingCommentId}`, {
         method: "DELETE",
         headers: {
-          Authorization: user && user.token `Bearer ${user.token}`,
+          Authorization: user && user.token`Bearer ${user.token}`,
         },
       });
 
@@ -272,13 +272,21 @@ const CourseDetailPage = ({ params }) => {
             )}
 
             {displayedComments.map(comment => (
-              <div key={comment._id} className="mb-4 p-4 border rounded-md">
-                <p className="text-sm text-gray-600">
-                  <strong>{comment.student.fullName}:</strong> {comment.comment}
-                </p>
-                <p className="text-xs text-gray-500">
+              <div key={comment._id} className="mb-4 p-2 border rounded-md">
+                <div className="flex items-center mb-1">
+                  {comment.student.avatar && comment.student.avatar == null ? (
+                    <img
+                      src={comment.student.avatar}
+                      alt={comment.student.fullName}
+                      className="w-8 h-8 rounded-full mr-2"
+                    />
+                  ) : null}
+                  <span className="text-gray-800">{comment.student.fullName}</span>
+                </div>
+                <p className="text-gray-600 mb-2 mt-4 text-sm">{comment.comment}</p>
+                <span className="text-xs text-gray-500">
                   {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
-                </p>
+                </span>
 
                 {user && user._id === comment.student._id && (
                   <div className="mt-2 flex space-x-2">
