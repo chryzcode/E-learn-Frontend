@@ -3,8 +3,13 @@
 @tailwind utilities;
 
 
-form input:focus, form textarea:focus {
+form input:focus, form textarea:focus, textarea:focus {
   border: 1px solid black;
   outline: none;
+}
+
+
+input, select, textarea {
+  font-size: 13px;
 }
 
