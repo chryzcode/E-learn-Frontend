@@ -48,28 +48,27 @@ const CourseDetailPage = ({ params }) => {
       }
 
       const data = await response.json();
+      const courseData = data.course;
 
-      if (data.access) {
-        setCourse(data.access);
-        setHasAccess(true);
-        setLikes(data.access.likes || 0);
-        setComments(data.access.comments || []);
-        setAverageRating(data.access.averageRating || 0);
+      if (courseData) {
+        setCourse(courseData);
+        setHasAccess(courseData.videoUrl !== null); // Determine if the user has access to the video
+        setLikes(courseData.likes || 0);
+        setComments(courseData.comments || []);
+        setAverageRating(courseData.averageRating || 0);
 
         // Initialize displayedComments with the first batch
-        const initialComments = data.access.comments.slice(0, commentsToShow);
+        const initialComments = courseData.comments.slice(0, commentsToShow);
         setDisplayedComments(initialComments);
-        setMoreCommentsAvailable(data.access.comments.length > commentsToShow);
+        setMoreCommentsAvailable(courseData.comments.length > commentsToShow);
       } else {
-        setCourse(data.noAccess);
-        setHasAccess(false);
+        setCourse(null);
       }
     } catch (error) {
-      console.error("Failed to fetch course:", error);
+      console.error("Error fetching course data:", error);
       setCourse(null);
     } finally {
       setIsLoading(false);
-      console.log("Finished fetching course data");
     }
   };
 
@@ -78,14 +77,6 @@ const CourseDetailPage = ({ params }) => {
       videoRef.current.pause();
       toast.error("You do not have access to this course video.");
     }
-  };
-
-  const handleContextMenu = event => {
-    event.preventDefault();
-  };
-
-  const handleTouchStart = event => {
-    event.preventDefault();
   };
 
   const loadMoreComments = () => {
@@ -98,12 +89,17 @@ const CourseDetailPage = ({ params }) => {
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
+    if (!hasAccess) {
+      toast.error("You do not have access to add comments.");
+      return;
+    }
+
     try {
       const response = await fetch(`${BACKEND_URL}/course/comment/${courseId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: user && user.token`Bearer ${user.token}`,
+          Authorization: `Bearer ${user.token}`,
         },
         body: JSON.stringify({
           comment: newComment,
@@ -127,12 +123,17 @@ const CourseDetailPage = ({ params }) => {
   const handleEditComment = async () => {
     if (!editingCommentText.trim()) return;
 
+    if (!hasAccess) {
+      toast.error("You do not have access to edit comments.");
+      return;
+    }
+
     try {
-      const response = await fetch(`${BACKEND_URL}course/${courseId}/comment/${editingCommentId}`, {
+      const response = await fetch(`${BACKEND_URL}/course/${courseId}/comment/${editingCommentId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: user && user.token`Bearer ${user.token}`,
+          Authorization: `Bearer ${user.token}`,
         },
         body: JSON.stringify({
           comment: editingCommentText,
@@ -156,11 +157,16 @@ const CourseDetailPage = ({ params }) => {
   };
 
   const handleDeleteComment = async commentId => {
+    if (!hasAccess) {
+      toast.error("You do not have access to delete comments.");
+      return;
+    }
+
     try {
-      const response = await fetch(`${BACKEND_URL}course/${courseId}/comment/${editingCommentId}`, {
+      const response = await fetch(`${BACKEND_URL}/course/${courseId}/comment/${commentId}`, {
         method: "DELETE",
         headers: {
-          Authorization: user && user.token`Bearer ${user.token}`,
+          Authorization: `Bearer ${user.token}`,
         },
       });
 
@@ -182,10 +188,10 @@ const CourseDetailPage = ({ params }) => {
   }
 
   if (!course) {
-    return <div className="flex items-center justify-center min-h-screen text-2xl">Course not found</div>;
+    return <div className="flex items-center justify-center min-h-screen text-2xl">No course available</div>;
   }
 
-  const { title, price, category, instructor, createdAt, description, video } = course;
+  const { title, price, category, instructor, createdAt, description, videoUrl } = course;
   const instructorName = instructor ? instructor.fullName || instructor.name : "Unknown Instructor";
   const instructorId = instructor ? instructor._id : "#";
 
@@ -193,19 +199,21 @@ const CourseDetailPage = ({ params }) => {
     <div className="container mx-auto px-4 py-8">
       <div className="course-details bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="relative">
-          <video
-            ref={videoRef}
-            controls
-            controlsList="nodownload"
-            className="w-full h-64 md:h-96 object-contain"
-            onPlay={handleVideoPlay}
-            onContextMenu={handleContextMenu}
-            onTouchStart={handleTouchStart}
-            preload="metadata"
-            disablePictureInPicture>
-            <source src={video} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          {videoUrl ? (
+            <video
+              ref={videoRef}
+              controls
+              controlsList="nodownload"
+              className="w-full h-64 md:h-96 object-contain"
+              onPlay={handleVideoPlay}
+              preload="metadata"
+              disablePictureInPicture>
+              <source src={videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            <div className="w-full h-64 md:h-96 bg-gray-200 flex items-center justify-center">Enroll to view video</div>
+          )}
         </div>
         <div className="p-6">
           <div className="flex justify-end my-4">
@@ -241,104 +249,91 @@ const CourseDetailPage = ({ params }) => {
               <div>
                 <strong>Likes:</strong> {likes} {likes > 1 ? "Likes" : "Like"}
               </div>
-
               <div>
-                <strong>Average Rating:</strong> {averageRating}
+                <strong>Rating:</strong> {averageRating.toFixed(1)} / 5
+              </div>
+              <div>
+                <strong>Created:</strong> {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
               </div>
             </div>
-            <div className="text-xs text-gray-500 my-5">
-              <strong>Created:</strong> {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
-            </div>
           </div>
-          <p className="text-base text-gray-600 mb-4">{description || "No description available"}</p>
+
+          <p className="text-gray-700 mb-4">{description}</p>
 
           <div className="mt-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Comments</h2>
-            {user && (
-              <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2">Comments</h3>
+            <div className="mb-4">
+              {displayedComments.map(comment => (
+                <div key={comment._id} className="border-b pb-2 mb-2">
+                  <div className="flex items-center mb-2">
+                    {comment.student.avatar && comment.student.avatar == null ? (
+                      <img
+                        src={comment.student.avatar}
+                        alt={comment.student.fullName}
+                        className="w-8 h-8 rounded-full mr-2"
+                      />
+                    ) : null}
+                    <span className="font-semibold">{comment.student.fullName}</span>
+                  </div>
+                  <p>{comment.comment}</p>
+                  <div className="text-sm text-gray-500">
+                    {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                  </div>
+                  {user && user._id === comment.student._id && (
+                    <div className="mt-2">
+                      <button
+                        onClick={() => {
+                          setEditingCommentId(comment._id);
+                          setEditingCommentText(comment.comment);
+                        }}
+                        className="bg-blue-500 text-white py-1 px-2 rounded mr-2">
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteComment(comment._id)}
+                        className="bg-red-500 text-white py-1 px-2 rounded">
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+              {moreCommentsAvailable && (
+                <small onClick={loadMoreComments} className="hover:underline hover:cursor-pointer">
+                  View more
+                </small>
+              )}
+            </div>
+
+            {hasAccess && (
+              <div className="mt-6">
                 <textarea
-                  className="w-full p-2 border rounded-md"
-                  rows="3"
-                  placeholder="Add a comment"
                   value={newComment}
                   onChange={e => setNewComment(e.target.value)}
-                />
-                <button
-                  className="bg-black text-white py-2 px-8 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base mt-3"
-                  onClick={handleAddComment}>
-                  Post
+                  rows="4"
+                  className="w-full p-2 border border-gray-300 rounded mb-4"
+                  placeholder="Add a comment..."></textarea>
+                <button onClick={handleAddComment} className="bg-blue-500 text-white py-2 px-4 rounded">
+                  Add Comment
                 </button>
               </div>
             )}
 
-            {displayedComments.map(comment => (
-              <div key={comment._id} className="mb-4 p-2 border rounded-md">
-                <div className="flex items-center mb-1">
-                  {comment.student.avatar && comment.student.avatar == null ? (
-                    <img
-                      src={comment.student.avatar}
-                      alt={comment.student.fullName}
-                      className="w-8 h-8 rounded-full mr-2"
-                    />
-                  ) : null}
-                  <span className="text-gray-800">{comment.student.fullName}</span>
-                </div>
-                <p className="text-gray-600 mb-2 mt-4 text-sm">{comment.comment}</p>
-                <span className="text-xs text-gray-500">
-                  {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
-                </span>
-
-                {user && user._id === comment.student._id && (
-                  <div className="mt-2 flex space-x-2">
-                    <button
-                      className="text-blue-500 hover:underline"
-                      onClick={() => {
-                        setEditingCommentId(comment._id);
-                        setEditingCommentText(comment.comment);
-                      }}>
-                      Edit
-                    </button>
-                    <button className="text-red-500 hover:underline" onClick={() => handleDeleteComment(comment._id)}>
-                      Delete
-                    </button>
-                  </div>
-                )}
+            {editingCommentId && (
+              <div className="mt-6">
+                <textarea
+                  value={editingCommentText}
+                  onChange={e => setEditingCommentText(e.target.value)}
+                  rows="4"
+                  className="w-full p-2 border border-gray-300 rounded mb-4"></textarea>
+                <button onClick={handleEditComment} className="bg-blue-500 text-white py-2 px-4 rounded">
+                  Save Changes
+                </button>
               </div>
-            ))}
-            {moreCommentsAvailable && (
-              <small className=" hover:underline mt-2 cursor-pointer" onClick={loadMoreComments}>
-                View More
-              </small>
             )}
           </div>
         </div>
       </div>
-
-      {editingCommentId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-md">
-            <h3 className="text-lg font-bold mb-4">Edit Comment</h3>
-            <textarea
-              className="w-full p-2 border rounded-md"
-              rows="3"
-              value={editingCommentText}
-              onChange={e => setEditingCommentText(e.target.value)}
-            />
-            <div className="mt-4 flex justify-end space-x-2">
-              <button
-                className="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded hover:bg-gray-400"
-                onClick={() => setEditingCommentId(null)}>
-                Cancel
-              </button>
-              <button
-                className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
-                onClick={handleEditComment}>
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
