@@ -189,6 +189,14 @@ const CourseDetailPage = ({ params }) => {
     }
   };
 
+  const handleEnrollClick = () => {
+    if (!user) {
+      router.push("/auth/sign-in"); // Redirect to the sign-in page if not authenticated
+    } else {
+      enrolCourse(); // Proceed with the enrollment function if authenticated
+    }
+  };
+
   const enrolCourse = async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/course/enroll/${courseId}`, {
@@ -255,21 +263,19 @@ const CourseDetailPage = ({ params }) => {
         </div>
 
         <div className="p-6">
-          {user ? (
-            <div className="flex justify-end my-4">
-              {hasAccess ? (
-                <div className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
-                  ChatRoom
-                </div>
-              ) : (
-                <div
-                  onClick={enrolCourse}
-                  className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
-                  Enroll
-                </div>
-              )}
-            </div>
-          ) : null}
+          <div className="flex justify-end my-4">
+            {hasAccess ? (
+              <div className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
+                ChatRoom
+              </div>
+            ) : (
+              <div
+                onClick={handleEnrollClick}
+                className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
+                Enroll
+              </div>
+            )}
+          </div>
 
           <h1 className="text-3xl font-bold text-gray-800 mb-4">{title}</h1>
 
@@ -294,7 +300,7 @@ const CourseDetailPage = ({ params }) => {
                 <strong>Likes:</strong> {likes} {likes > 1 ? "Likes" : "Like"}
               </div>
               <div>
-                <strong>Rating:</strong> {averageRating.toFixed(1)} 
+                <strong>Rating:</strong> {averageRating.toFixed(1)}
               </div>
               <div>
                 <strong>Created:</strong> {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
