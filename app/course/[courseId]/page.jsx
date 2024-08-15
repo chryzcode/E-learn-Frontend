@@ -24,7 +24,7 @@ const CourseDetailPage = ({ params }) => {
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentText, setEditingCommentText] = useState("");
-  const [isEditingComment, setIsEditingComment] = useState({}); // New state for managing comment edits
+  const [isEditing, setIsEditing] = useState(false);
   const videoRef = useRef(null);
 
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
@@ -85,9 +85,6 @@ const CourseDetailPage = ({ params }) => {
     setMoreCommentsAvailable(comments.length > newCommentsToShow);
   };
 
-  const handleEditCommentClick = commentId => {
-    setIsEditingComment({ id: commentId, isEditing: true });
-  };
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
@@ -219,6 +216,11 @@ const CourseDetailPage = ({ params }) => {
     }
   };
 
+  const cancelEdit = () => {
+    setIsEditing(false);
+    setEditingCommentId("");
+  };
+
   if (isLoading) {
     return <Spinner />;
   }
@@ -292,7 +294,7 @@ const CourseDetailPage = ({ params }) => {
                 <strong>Likes:</strong> {likes} {likes > 1 ? "Likes" : "Like"}
               </div>
               <div>
-                <strong>Rating:</strong> {averageRating.toFixed(1)} / 5
+                <strong>Rating:</strong> {averageRating.toFixed(1)} 
               </div>
               <div>
                 <strong>Created:</strong> {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
@@ -305,54 +307,6 @@ const CourseDetailPage = ({ params }) => {
           <div className="mt-6">
             <h3 className="text-lg font-semibold mb-2">Comments</h3>
 
-            <div className="my-4">
-              {displayedComments.map(comment => (
-                <div key={comment._id} className="border-b pb-2 mb-2">
-                  {comment && comment.student ? (
-                    <div className="flex items-center mb-2">
-                      {comment.student.avatar ? (
-                        <img
-                          src={comment.student.avatar}
-                          alt={comment.student.fullName}
-                          className="w-8 h-8 rounded-full mr-2"
-                        />
-                      ) : null}
-                      <span className="font-semibold">{comment.student.fullName}</span>
-                    </div>
-                  ) : null}
-
-                  <p>{comment.comment}</p>
-                  <div className="text-sm text-gray-500">
-                    {comment.createdAt && !isNaN(Date.parse(comment.createdAt))
-                      ? formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })
-                      : "Invalid date"}
-                  </div>
-                  {hasAccess && user && comment && comment.student && user.user._id === comment.student._id && (
-                    <div className="mt-2 text-right">
-                      <span
-                        onClick={() => {
-                          setEditingCommentId(comment._id);
-                          setEditingCommentText(comment.comment);
-                        }}
-                        className="text-blue-500 hover:cursor-pointer hover:underline  mr-4">
-                        Edit
-                      </span>
-                      <span
-                        onClick={() => handleDeleteComment(comment._id)}
-                        className="text-red-500 hover:cursor-pointer hover:underline rounded">
-                        Delete
-                      </span>
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {moreCommentsAvailable && (
-                <small onClick={loadMoreComments} className="hover:underline hover:cursor-pointer mt-2">
-                  View more
-                </small>
-              )}
-            </div>
             {hasAccess && (
               <div className="mt-6">
                 <textarea
@@ -369,18 +323,79 @@ const CourseDetailPage = ({ params }) => {
               </div>
             )}
 
-            {editingCommentId && (
-              <div className="mt-6">
-                <textarea
-                  value={editingCommentText}
-                  onChange={e => setEditingCommentText(e.target.value)}
-                  rows="4"
-                  className="w-full p-2 border border-gray-300 rounded mb-4"></textarea>
-                <button onClick={handleEditComment} className="bg-blue-500 text-white py-2 px-4 rounded">
-                  Save Changes
-                </button>
-              </div>
-            )}
+            <div className="my-4">
+              {displayedComments.map(comment => (
+                <div key={comment._id} className="border-b pb-2 mb-2">
+                  {editingCommentId === comment._id ? (
+                    <div className="mt-6">
+                      <textarea
+                        value={editingCommentText}
+                        onChange={e => setEditingCommentText(e.target.value)}
+                        rows="4"
+                        className="w-full p-2 border border-gray-300 rounded mb-4"></textarea>
+                      <div className="text-right">
+                        <span
+                          onClick={handleEditComment}
+                          className="text-blue-500 hover:underline hover:cursor-pointer mr-4">
+                          Save
+                        </span>
+                        <span onClick={cancelEdit} className="text-red-500 hover:underline hover:cursor-pointer">
+                          Cancel
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {comment && comment.student ? (
+                        <div className="flex items-center mb-2">
+                          {comment.student.avatar ? (
+                            <img
+                              src={comment.student.avatar}
+                              alt={comment.student.fullName}
+                              className="w-8 h-8 rounded-full mr-2"
+                            />
+                          ) : null}
+                          <span className="font-semibold">{comment.student.fullName}</span>
+                        </div>
+                      ) : null}
+
+                      <p className="text-sm">{comment.comment}</p>
+                      <div className="flex justify-between items-center align-middle  mt-3">
+                        <div className="text-xs text-gray-500">
+                          {comment.createdAt && !isNaN(Date.parse(comment.createdAt))
+                            ? formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })
+                            : "Invalid date"}
+                        </div>
+                        {hasAccess && user && comment && comment.student && user.user._id === comment.student._id && (
+                          <div className="">
+                            <span
+                              onClick={() => {
+                                setIsEditing(true);
+                                setEditingCommentId(comment._id);
+                                setEditingCommentText(comment.comment);
+                              }}
+                              className="text-blue-500 hover:cursor-pointer hover:underline mr-4">
+                              Edit
+                            </span>
+                            <span
+                              onClick={() => handleDeleteComment(comment._id)}
+                              className="text-red-500 hover:cursor-pointer hover:underline">
+                              Delete
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+
+              {moreCommentsAvailable && (
+                <small onClick={loadMoreComments} className="hover:underline hover:cursor-pointer mt-2">
+                  View more
+                </small>
+              )}
+            </div>
           </div>
         </div>
       </div>
