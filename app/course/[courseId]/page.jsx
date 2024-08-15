@@ -24,13 +24,14 @@ const CourseDetailPage = ({ params }) => {
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentText, setEditingCommentText] = useState("");
+  const [isEditingComment, setIsEditingComment] = useState({}); // New state for managing comment edits
   const videoRef = useRef(null);
 
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
 
   useEffect(() => {
     fetchCourse();
-  }, [courseId]);
+  }, [courseId, user]);
 
   const fetchCourse = async () => {
     try {
@@ -53,7 +54,6 @@ const CourseDetailPage = ({ params }) => {
       if (courseData) {
         setCourse(courseData);
         setHasAccess(courseData.video !== null); // Determine if the user has access to the video
-        setLikes(courseData.likes || 0);
         setComments(courseData.comments || []);
         setAverageRating(courseData.averageRating || 0);
 
@@ -71,7 +71,6 @@ const CourseDetailPage = ({ params }) => {
       setIsLoading(false);
     }
   };
-
   const handleVideoPlay = () => {
     if (!hasAccess) {
       videoRef.current.pause();
@@ -86,6 +85,9 @@ const CourseDetailPage = ({ params }) => {
     setMoreCommentsAvailable(comments.length > newCommentsToShow);
   };
 
+  const handleEditCommentClick = commentId => {
+    setIsEditingComment({ id: commentId, isEditing: true });
+  };
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
@@ -110,7 +112,9 @@ const CourseDetailPage = ({ params }) => {
         throw new Error("Failed to add comment");
       }
 
-      const addedComment = await response.json();
+      const data = await response.json();
+      const addedComment = data.comment; // Extracting the comment object
+
       setComments([addedComment, ...comments]);
       setDisplayedComments([addedComment, ...displayedComments]);
       setNewComment("");
@@ -144,8 +148,12 @@ const CourseDetailPage = ({ params }) => {
         throw new Error("Failed to edit comment");
       }
 
-      const updatedComment = await response.json();
+      const data = await response.json();
+      const updatedComment = data.comment;
+      toast.success("Comment updated");
+
       const updatedComments = comments.map(comment => (comment._id === editingCommentId ? updatedComment : comment));
+
       setComments(updatedComments);
       setDisplayedComments(updatedComments.slice(0, commentsToShow));
       setEditingCommentId(null);
@@ -173,7 +181,8 @@ const CourseDetailPage = ({ params }) => {
       if (!response.ok) {
         throw new Error("Failed to delete comment");
       }
-
+      const data = await response.json();
+      toast.success(data.success);
       const updatedComments = comments.filter(comment => comment._id !== commentId);
       setComments(updatedComments);
       setDisplayedComments(updatedComments.slice(0, commentsToShow));
@@ -202,7 +211,7 @@ const CourseDetailPage = ({ params }) => {
         toast.success("Enrollment successful!");
         setHasAccess(true);
       } else if (data.payment) {
-        router.push(data.payment); 
+        window.open(data.payment, "_blank");
       }
     } catch (error) {
       console.error("Failed to enroll:", error);
@@ -242,20 +251,24 @@ const CourseDetailPage = ({ params }) => {
             <div className="w-full h-64 md:h-96 bg-gray-200 flex items-center justify-center">Enroll to view video</div>
           )}
         </div>
+
         <div className="p-6">
-          <div className="flex justify-end my-4">
-            {hasAccess ? (
-              <div className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
-                ChatRoom
-              </div>
-            ) : (
-              <div
-                onClick={enrolCourse}
-                className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
-                Enroll
-              </div>
-            )}
-          </div>
+          {user ? (
+            <div className="flex justify-end my-4">
+              {hasAccess ? (
+                <div className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
+                  ChatRoom
+                </div>
+              ) : (
+                <div
+                  onClick={enrolCourse}
+                  className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
+                  Enroll
+                </div>
+              )}
+            </div>
+          ) : null}
+
           <h1 className="text-3xl font-bold text-gray-800 mb-4">{title}</h1>
 
           <div className="text-sm text-gray-700 mb-4">
@@ -297,7 +310,7 @@ const CourseDetailPage = ({ params }) => {
                 <div key={comment._id} className="border-b pb-2 mb-2">
                   {comment && comment.student ? (
                     <div className="flex items-center mb-2">
-                      {comment.student && comment.student.avatar && comment.student.avatar == null ? (
+                      {comment.student.avatar ? (
                         <img
                           src={comment.student.avatar}
                           alt={comment.student.fullName}
@@ -310,34 +323,36 @@ const CourseDetailPage = ({ params }) => {
 
                   <p>{comment.comment}</p>
                   <div className="text-sm text-gray-500">
-                    {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                    {comment.createdAt && !isNaN(Date.parse(comment.createdAt))
+                      ? formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })
+                      : "Invalid date"}
                   </div>
-                  {user && user._id === comment.student._id && (
-                    <div className="mt-2">
-                      <button
+                  {hasAccess && user && comment && comment.student && user.user._id === comment.student._id && (
+                    <div className="mt-2 text-right">
+                      <span
                         onClick={() => {
                           setEditingCommentId(comment._id);
                           setEditingCommentText(comment.comment);
                         }}
-                        className="bg-blue-500 text-white py-1 px-2 rounded mr-2">
+                        className="text-blue-500 hover:cursor-pointer hover:underline  mr-4">
                         Edit
-                      </button>
-                      <button
+                      </span>
+                      <span
                         onClick={() => handleDeleteComment(comment._id)}
-                        className="bg-red-500 text-white py-1 px-2 rounded">
+                        className="text-red-500 hover:cursor-pointer hover:underline rounded">
                         Delete
-                      </button>
+                      </span>
                     </div>
                   )}
                 </div>
               ))}
+
               {moreCommentsAvailable && (
                 <small onClick={loadMoreComments} className="hover:underline hover:cursor-pointer mt-2">
                   View more
                 </small>
               )}
             </div>
-
             {hasAccess && (
               <div className="mt-6">
                 <textarea
