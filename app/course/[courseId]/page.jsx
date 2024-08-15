@@ -52,7 +52,7 @@ const CourseDetailPage = ({ params }) => {
 
       if (courseData) {
         setCourse(courseData);
-        setHasAccess(courseData.videoUrl !== null); // Determine if the user has access to the video
+        setHasAccess(courseData.video !== null); // Determine if the user has access to the video
         setLikes(courseData.likes || 0);
         setComments(courseData.comments || []);
         setAverageRating(courseData.averageRating || 0);
@@ -183,6 +183,33 @@ const CourseDetailPage = ({ params }) => {
     }
   };
 
+  const enrolCourse = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/course/enroll/${courseId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to enroll");
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success("Enrollment successful!");
+        setHasAccess(true);
+      } else if (data.payment) {
+        router.push(data.payment); 
+      }
+    } catch (error) {
+      console.error("Failed to enroll:", error);
+      toast.error("Failed to enroll");
+    }
+  };
+
   if (isLoading) {
     return <Spinner />;
   }
@@ -191,7 +218,7 @@ const CourseDetailPage = ({ params }) => {
     return <div className="flex items-center justify-center min-h-screen text-2xl">No course available</div>;
   }
 
-  const { title, price, category, instructor, createdAt, description, videoUrl } = course;
+  const { title, price, category, instructor, createdAt, description, video } = course;
   const instructorName = instructor ? instructor.fullName || instructor.name : "Unknown Instructor";
   const instructorId = instructor ? instructor._id : "#";
 
@@ -199,7 +226,7 @@ const CourseDetailPage = ({ params }) => {
     <div className="container mx-auto px-4 py-8">
       <div className="course-details bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="relative">
-          {videoUrl ? (
+          {video ? (
             <video
               ref={videoRef}
               controls
@@ -208,7 +235,7 @@ const CourseDetailPage = ({ params }) => {
               onPlay={handleVideoPlay}
               preload="metadata"
               disablePictureInPicture>
-              <source src={videoUrl} type="video/mp4" />
+              <source src={video} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           ) : (
@@ -218,11 +245,13 @@ const CourseDetailPage = ({ params }) => {
         <div className="p-6">
           <div className="flex justify-end my-4">
             {hasAccess ? (
-              <div className="bg-black text-white font-bold py-2 px-8 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
+              <div className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
                 ChatRoom
               </div>
             ) : (
-              <div className="bg-black text-white font-bold py-2 px-8 focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
+              <div
+                onClick={enrolCourse}
+                className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
                 Enroll
               </div>
             )}
@@ -258,23 +287,27 @@ const CourseDetailPage = ({ params }) => {
             </div>
           </div>
 
-          <p className="text-gray-700 mb-4">{description}</p>
+          <p className="text-gray-700 mb-4 text-sm">{description}</p>
 
           <div className="mt-6">
             <h3 className="text-lg font-semibold mb-2">Comments</h3>
-            <div className="mb-4">
+
+            <div className="my-4">
               {displayedComments.map(comment => (
                 <div key={comment._id} className="border-b pb-2 mb-2">
-                  <div className="flex items-center mb-2">
-                    {comment.student.avatar && comment.student.avatar == null ? (
-                      <img
-                        src={comment.student.avatar}
-                        alt={comment.student.fullName}
-                        className="w-8 h-8 rounded-full mr-2"
-                      />
-                    ) : null}
-                    <span className="font-semibold">{comment.student.fullName}</span>
-                  </div>
+                  {comment && comment.student ? (
+                    <div className="flex items-center mb-2">
+                      {comment.student && comment.student.avatar && comment.student.avatar == null ? (
+                        <img
+                          src={comment.student.avatar}
+                          alt={comment.student.fullName}
+                          className="w-8 h-8 rounded-full mr-2"
+                        />
+                      ) : null}
+                      <span className="font-semibold">{comment.student.fullName}</span>
+                    </div>
+                  ) : null}
+
                   <p>{comment.comment}</p>
                   <div className="text-sm text-gray-500">
                     {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
@@ -299,7 +332,7 @@ const CourseDetailPage = ({ params }) => {
                 </div>
               ))}
               {moreCommentsAvailable && (
-                <small onClick={loadMoreComments} className="hover:underline hover:cursor-pointer">
+                <small onClick={loadMoreComments} className="hover:underline hover:cursor-pointer mt-2">
                   View more
                 </small>
               )}
@@ -313,8 +346,10 @@ const CourseDetailPage = ({ params }) => {
                   rows="4"
                   className="w-full p-2 border border-gray-300 rounded mb-4"
                   placeholder="Add a comment..."></textarea>
-                <button onClick={handleAddComment} className="bg-blue-500 text-white py-2 px-4 rounded">
-                  Add Comment
+                <button
+                  onClick={handleAddComment}
+                  className="bg-black text-white py-2 px-3 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
+                  Comment
                 </button>
               </div>
             )}
