@@ -88,9 +88,13 @@ const Nav = () => {
                   <Link href="/my-wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     My WishList
                   </Link>
-                  <Link href="/my-account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    My Account
-                  </Link>
+                  {user && user.user.userType === "Instructor" ? (
+                    <Link
+                      href={`/instructor/profile/${user.user._id}`} // Note: user.user._id instead of user._id
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      My Account
+                    </Link>
+                  ) : null}
                   <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Settings
                   </Link>
@@ -166,12 +170,14 @@ const Nav = () => {
                   onClick={() => setMobileMenuOpen(false)}>
                   My WishList
                 </Link>
-                <Link
-                  href="/my-account"
-                  className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
-                  onClick={() => setMobileMenuOpen(false)}>
-                  My Account
-                </Link>
+                {user && user.user.userType === "Instructor" ? (
+                  <Link
+                    href={`/instructor/profile/${user.user._id}`}
+                    className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
+                    onClick={() => setMobileMenuOpen(false)}>
+                    My Account
+                  </Link>
+                ) : null}
                 <Link
                   href="/settings"
                   className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"

@@ -18,7 +18,7 @@ const CoursesListing = ({ course }) => {
         <h2 className="text-xl font-semibold mb-2">{course.title}</h2>
         <div className="text-sm mb-1">
           <strong>Instructor:</strong>{" "}
-          <a href={`/instructor/${course.instructor._id}`} className="hover:underline">
+          <a href={`/instructor/profile/${course.instructor._id}`} className="hover:underline">
             {course.instructor.fullName}
           </a>
         </div>
