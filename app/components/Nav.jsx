@@ -76,23 +76,25 @@ const Nav = () => {
         <div className="hidden md:flex flex-1 justify-end items-center space-x-6">
           {user ? (
             <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={toggleDropdown}
-                className="flex items-center space-x-2 text-base">
+              <button onClick={toggleDropdown} className="flex items-center space-x-2 text-base">
                 <span>{user.user.fullName}</span>
                 <HiChevronDown />
               </button>
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded">
-                  <Link href="/my-courses" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <Link href="/course/my-courses" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     My Courses
                   </Link>
                   <Link href="/my-wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     My WishList
                   </Link>
-                  <Link href="/my-account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    My Account
-                  </Link>
+                  {user && user.user.userType === "Instructor" ? (
+                    <Link
+                      href={`/instructor/profile/${user.user._id}`} // Note: user.user._id instead of user._id
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      My Account
+                    </Link>
+                  ) : null}
                   <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Settings
                   </Link>
@@ -157,7 +159,7 @@ const Nav = () => {
             {user ? (
               <>
                 <Link
-                  href="/my-courses"
+                  href="/course/my-courses"
                   className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
                   onClick={() => setMobileMenuOpen(false)}>
                   My Courses
@@ -168,12 +170,14 @@ const Nav = () => {
                   onClick={() => setMobileMenuOpen(false)}>
                   My WishList
                 </Link>
-                <Link
-                  href="/my-account"
-                  className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
-                  onClick={() => setMobileMenuOpen(false)}>
-                  My Account
-                </Link>
+                {user && user.user.userType === "Instructor" ? (
+                  <Link
+                    href={`/instructor/profile/${user.user._id}`}
+                    className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
+                    onClick={() => setMobileMenuOpen(false)}>
+                    My Account
+                  </Link>
+                ) : null}
                 <Link
                   href="/settings"
                   className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
