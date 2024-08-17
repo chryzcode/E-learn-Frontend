@@ -6,6 +6,8 @@ import { toast } from "react-toastify";
 import { useAuthState } from "@/app/utils/AuthContext";
 import Spinner from "@/app/components/Spinner";
 import { formatDistanceToNow } from "date-fns";
+import { AiOutlineLike } from "react-icons/ai";
+import { FaRegHeart } from "react-icons/fa";
 import Link from "next/link";
 
 const CourseDetailPage = ({ params }) => {
@@ -24,14 +26,31 @@ const CourseDetailPage = ({ params }) => {
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentText, setEditingCommentText] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
+  const [studentCount, setStudentCount] = useState(0);
   const videoRef = useRef(null);
 
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
 
   useEffect(() => {
     fetchCourse();
+    fetchStudentCount();
   }, [courseId, user]);
+
+  const fetchStudentCount = async () => {
+    const response = await fetch(`${BACKEND_URL}/course/${courseId}/students`);
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch students");
+    }
+
+    const data = await response.json();
+    const students = data.students;
+
+    if (students) {
+      setStudentCount(students.length);
+      setCourse(null);
+    }
+  };
 
   const fetchCourse = async () => {
     try {
@@ -225,7 +244,6 @@ const CourseDetailPage = ({ params }) => {
   };
 
   const cancelEdit = () => {
-    setIsEditing(false);
     setEditingCommentId("");
   };
 
@@ -263,18 +281,25 @@ const CourseDetailPage = ({ params }) => {
         </div>
 
         <div className="p-6">
-          <div className="flex justify-end my-4">
-            {hasAccess ? (
-              <div className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
-                ChatRoom
-              </div>
-            ) : (
-              <div
-                onClick={handleEnrollClick}
-                className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
-                Enroll
-              </div>
-            )}
+          <div className="flex justify-between align-middle items-center my-4">
+            <div className="flex align-middle items-center gap-4 text-2xl">
+              {hasAccess ? <AiOutlineLike /> : null}
+
+              {user ? <FaRegHeart /> : null}
+            </div>
+            <div>
+              {hasAccess ? (
+                <div className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
+                  ChatRoom
+                </div>
+              ) : (
+                <div
+                  onClick={handleEnrollClick}
+                  className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
+                  Enroll
+                </div>
+              )}
+            </div>
           </div>
 
           <h1 className="text-3xl font-bold text-gray-800 mb-4">{title}</h1>
@@ -303,8 +328,12 @@ const CourseDetailPage = ({ params }) => {
                 <strong>Rating:</strong> {averageRating.toFixed(1)}
               </div>
               <div>
-                <strong>Created:</strong> {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+                <strong>Students count:</strong> {studentCount}
               </div>
+            </div>
+
+            <div>
+              <strong>Created:</strong> {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
             </div>
           </div>
 
@@ -376,7 +405,6 @@ const CourseDetailPage = ({ params }) => {
                           <div className="">
                             <span
                               onClick={() => {
-                                setIsEditing(true);
                                 setEditingCommentId(comment._id);
                                 setEditingCommentText(comment.comment);
                               }}
