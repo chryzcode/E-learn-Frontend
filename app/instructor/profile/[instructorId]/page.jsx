@@ -6,12 +6,12 @@ import Spinner from "@/app/components/Spinner";
 import WithAuth from "@/app/utils/WithAuth";
 import { useParams } from "next/navigation";
 
-const instructorProfilepage = () => {
+const instructorProfilePage = () => {
   const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuthState();
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
-  const {instructorId} = useParams()
+  const { instructorId } = useParams();
 
   useEffect(() => {
     fetchCourses();
@@ -39,24 +39,33 @@ const instructorProfilepage = () => {
     return <Spinner />;
   }
 
-  // if (!courses.length) {
-  //   return <div className="flex items-center justify-center min-h-screen text-xl">No courses available</div>;
-  // }
   return (
     <div className="container mx-auto p-4">
-      <div>
-        <p> {user.user.fullName}</p>
-        <p>{user.user.userType}</p>
-        <div>{user.user.bio}</div>
+      <div className="text-center">
+        <div className="flex justify-center mb-6">
+          {user.user.avatar ? (
+            <img src={user.user.avatar} alt={user.user.fullName} className="w-32 h-32 rounded-full object-cover" />
+          ) : null}
+        </div>
+        <p className="text-3xl font-bold">{user.user.fullName}</p>
+        <p className="my-2 text-lg font-semibold">{user.user.userType}</p>
+        <div className="mt-4">
+          <p className="text-xl font-semibold">About/Bio:</p>
+          <p className="mt-2 text-base">{user.user.bio}</p>
+        </div>
       </div>
-      <h1 className="text-2xl font-bold mb-6 text-center">My Courses</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {courses.map(course => (
-          <CoursesListing course={course} key={course._id} />
-        ))}
-      </div>
+      <h1 className="text-2xl font-bold mb-6 text-center pt-16">My Courses ({courses.length})</h1>
+      {courses && courses.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {courses.map(course => (
+            <CoursesListing course={course} key={course._id} />
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-center justify-center text-xl">No courses available</div>
+      )}
     </div>
   );
 };
 
-export default WithAuth(instructorProfilepage);
+export default WithAuth(instructorProfilePage);
