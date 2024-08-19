@@ -7,6 +7,8 @@ import { useAuthState } from "@/app/utils/AuthContext";
 import Spinner from "@/app/components/Spinner";
 import { formatDistanceToNow } from "date-fns";
 import { AiOutlineLike } from "react-icons/ai";
+import { IoHeartDislikeOutline } from "react-icons/io5";
+import { BiDislike } from "react-icons/bi";
 import { FaRegHeart } from "react-icons/fa";
 import Link from "next/link";
 
@@ -17,7 +19,9 @@ const CourseDetailPage = ({ params }) => {
   const [course, setCourse] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
-  const [likes, setLikes] = useState(0);
+  const [likes, setLikes] = useState([]);
+  const [liked, setLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
   const [comments, setComments] = useState([]);
   const [displayedComments, setDisplayedComments] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
@@ -27,6 +31,9 @@ const CourseDetailPage = ({ params }) => {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentText, setEditingCommentText] = useState("");
   const [studentCount, setStudentCount] = useState(0);
+  const [wishlist, setWishlist] = useState([]);
+  const [isWhitelisted, setIsWhitelisted] = useState(false);
+
   const videoRef = useRef(null);
 
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
@@ -34,7 +41,24 @@ const CourseDetailPage = ({ params }) => {
   useEffect(() => {
     fetchCourse();
     fetchStudentCount();
+    fetchLikesCountData();
+    checkWishlist();
   }, [courseId, user]);
+
+  const checkWishlist = async () => {
+    const response = await fetch(`${BACKEND_URL}/course/wishlists`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: user && `Bearer ${user.token}`, // Ensure token is managed properly
+      },
+    });
+    const data = await response.json();
+    if (response.ok) {
+      setWishlist(data.wishlist);
+      setIsWhitelisted(data.wishlist.some(item => item._id === courseId));
+    }
+  };
 
   const fetchStudentCount = async () => {
     const response = await fetch(`${BACKEND_URL}/course/${courseId}/students`);
@@ -49,6 +73,22 @@ const CourseDetailPage = ({ params }) => {
     if (students) {
       setStudentCount(students.length);
       setCourse(null);
+    }
+  };
+
+  const fetchLikesCountData = async () => {
+    const response = await fetch(`${BACKEND_URL}/course/like/${courseId}`);
+
+    if (!response.ok) {
+      throw new Error("Failed to get couse like details");
+    }
+
+    const data = await response.json();
+    const likes = data.likes;
+
+    if (likes) {
+      setLikes(likes);
+      setLikesCount(likes.length);
     }
   };
 
@@ -247,6 +287,115 @@ const CourseDetailPage = ({ params }) => {
     setEditingCommentId("");
   };
 
+  const likeCourse = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/course/like/${courseId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success("Course liked");
+        setLikes(prevLikes => [...prevLikes, { user: { _id: user._id } }]);
+        setLikesCount(prevCount => prevCount + 1);
+        setLiked(true);
+      } else {
+        toast.error(data.error || "Failed to like course");
+      }
+    } catch (error) {
+      console.log("Error:", error);
+      toast.error("Failed to like course");
+    }
+  };
+
+  const unlikeCourse = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/course/like/${courseId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success("Course unliked");
+        setLikes(prevLikes => prevLikes.filter(like => like.user._id !== user._id));
+        setLikesCount(prevCount => prevCount - 1);
+        setLiked(false);
+      } else {
+        toast.error(data.error || "Failed to unlike course");
+      }
+    } catch (error) {
+      console.log("Error:", error);
+      toast.error("Failed to unlike course");
+    }
+  };
+
+  const onLikeClick = () => {
+    if (liked) {
+      unlikeCourse();
+    } else {
+      likeCourse();
+    }
+  };
+
+  const addToWishlist = async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/course/${courseId}/wishlist`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Course added to wishlist");
+        setWishlist(prevWishlist => [...prevWishlist, data.course]);
+        setIsWhitelisted(true);
+      } else {
+        toast.error(data.error || "Failed to add to wishlist");
+      }
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      toast.error("Failed to add to wishlist");
+    }
+  };
+
+  const removeFromWishlist = async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/course/${courseId}/wishlist`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Course removed from wishlist");
+        setIsWhitelisted(false);
+      } else {
+        toast.error(data.error || "Failed to remove from wishlist");
+      }
+    } catch (error) {
+      console.error("Error removing from wishlist:", error);
+      toast.error("Failed to remove from wishlist");
+    }
+  };
+
+  const toggleWishlist = () => {
+    if (isWhitelisted) {
+      removeFromWishlist();
+    } else {
+      addToWishlist();
+    }
+  };
+
   if (isLoading) {
     return <Spinner />;
   }
@@ -283,9 +432,20 @@ const CourseDetailPage = ({ params }) => {
         <div className="p-6">
           <div className="flex justify-between align-middle items-center my-4">
             <div className="flex align-middle items-center gap-4 text-2xl">
-              {hasAccess ? <AiOutlineLike /> : null}
-
-              {user ? <FaRegHeart /> : null}
+              {hasAccess ? (
+                liked ? (
+                  <BiDislike className="hover:cursor-pointer" onClick={onLikeClick} />
+                ) : (
+                  <AiOutlineLike className="hover:cursor-pointer" onClick={onLikeClick} />
+                )
+              ) : null}
+              {user ? (
+                isWhitelisted ? (
+                  <IoHeartDislikeOutline className="hover:cursor-pointer" onClick={toggleWishlist} />
+                ) : (
+                  <FaRegHeart className="hover:cursor-pointer" onClick={toggleWishlist} />
+                )
+              ) : null}
             </div>
             <div>
               {hasAccess ? (
@@ -322,7 +482,7 @@ const CourseDetailPage = ({ params }) => {
 
             <div className="flex flex-wrap gap-4 mb-2">
               <div>
-                <strong>Likes:</strong> {likes} {likes > 1 ? "Likes" : "Like"}
+                <strong>Likes:</strong> {likesCount} {likesCount > 1 ? "Likes" : "Like"}
               </div>
               <div>
                 <strong>Rating:</strong> {averageRating.toFixed(1)}
