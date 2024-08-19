@@ -7,7 +7,7 @@ import { useParams } from "next/navigation";
 const instructorProfilePage = () => {
   const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [ instructor, setInstructor ] = useState(null);
+  const [instructor, setInstructor] = useState(null);
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
   const { instructorId } = useParams();
 
@@ -22,10 +22,7 @@ const instructorProfilePage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        console.log("Fetched instructor data:", data.user);
         setInstructor(data.user);
-      } else {
-        console.error("Failed to fetch instructor:", data);
       }
     } catch (error) {
       console.error("Failed to fetch instructor:", error);
