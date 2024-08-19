@@ -3,12 +3,11 @@ import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 
 const CoursesListing = ({ course }) => {
-
-      const router = useRouter();
+  const router = useRouter();
   return (
     <div
       className="relative border rounded-lg overflow-hidden shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300 flex flex-col"
-      onClick={() => router.push(`/course/${course._id}`)}>
+      onClick={() => router.push(`/course/detail/${course._id}`)}>
       {course.thumbnail ? (
         <div className="relative h-36">
           <img src={course.thumbnail} alt={course.title} className="absolute inset-0 w-full h-full object-cover" />
@@ -23,10 +22,23 @@ const CoursesListing = ({ course }) => {
           </a>
         </div>
         <div className="text-sm mb-1">
-          <strong>Price:</strong> {course.price ? `$${course.price}` : <span>Free</span>}
+          <strong>Price:</strong>{" "}
+          {course.price ? (
+            `$${course.price}`
+          ) : (
+            <span>
+              {" "}
+              <a href={`/course/free`} className="hover:underline">
+                Free
+              </a>
+            </span>
+          )}
         </div>
         <div className="text-sm ">
-          <strong>Category:</strong> {course.category.name}
+          <strong>Category:</strong>{" "}
+          <a href={`/course/category/${course.category._id}`} className="hover:underline">
+            {course.category.name}
+          </a>
         </div>
         {course.createdAt && (
           <div className="text-right text-xs text-gray-500 ">

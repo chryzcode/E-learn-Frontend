@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import Spinner from "@/app/components/Spinner";
-import CoursesListing from "../components/CoursesListing";
+import CoursesListing from "@/app/components/CoursesListing";
+import { useAuthState } from "@/app/utils/AuthContext";
+import WithAuth from "@/app/utils/WithAuth";
 
-
-const AllCoursesPage = () => {
+const MyWiishlistPage = () => {
   const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuthState();
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
 
   useEffect(() => {
@@ -16,9 +18,15 @@ const AllCoursesPage = () => {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/course`);
+      const response = await fetch(`${BACKEND_URL}/course/wishlists`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
-      setCourses(data.courses);
+      setCourses(data.wishlist);
       setIsLoading(false);
     } catch (error) {
       console.error("Failed to fetch courses:", error);
@@ -31,12 +39,12 @@ const AllCoursesPage = () => {
   }
 
   if (!courses.length) {
-    return <div className="flex items-center justify-center min-h-screen text-xl">No courses available</div>;
+    return <div className="flex items-center justify-center min-h-screen text-xl">No wish in the list</div>;
   }
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-center">All Courses</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">My Courses</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {courses.map(course => (
           <CoursesListing course={course} key={course._id} />
@@ -46,4 +54,4 @@ const AllCoursesPage = () => {
   );
 };
 
-export default AllCoursesPage;
+export default WithAuth(MyWiishlistPage);
