@@ -24,7 +24,6 @@ const CourseDetailPage = ({ params }) => {
   const [likesCount, setLikesCount] = useState(0);
   const [comments, setComments] = useState([]);
   const [displayedComments, setDisplayedComments] = useState([]);
-  const [averageRating, setAverageRating] = useState(0);
   const [commentsToShow, setCommentsToShow] = useState(1); // Show only the first comment initially
   const [moreCommentsAvailable, setMoreCommentsAvailable] = useState(false); // To check if more comments are available
   const [newComment, setNewComment] = useState("");
@@ -114,7 +113,6 @@ const CourseDetailPage = ({ params }) => {
         setCourse(courseData);
         setHasAccess(courseData.video !== null); // Determine if the user has access to the video
         setComments(courseData.comments || []);
-        setAverageRating(courseData.averageRating || 0);
 
         // Initialize displayedComments with the first batch
         const initialComments = courseData.comments.slice(0, commentsToShow);
@@ -483,9 +481,6 @@ const CourseDetailPage = ({ params }) => {
             <div className="flex flex-wrap gap-4 mb-2">
               <div>
                 <strong>Likes:</strong> {likesCount} {likesCount > 1 ? "Likes" : "Like"}
-              </div>
-              <div>
-                <strong>Rating:</strong> {averageRating.toFixed(1)}
               </div>
               <div>
                 <strong>Students count:</strong> {studentCount}
