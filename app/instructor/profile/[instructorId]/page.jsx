@@ -1,31 +1,42 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import CoursesListing from "@/app/components/CoursesListing";
-import { useAuthState } from "@/app/utils/AuthContext";
 import Spinner from "@/app/components/Spinner";
-import WithAuth from "@/app/utils/WithAuth";
 import { useParams } from "next/navigation";
 
 const instructorProfilePage = () => {
   const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuthState();
+  const [ instructor, setInstructor ] = useState(null);
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
   const { instructorId } = useParams();
 
   useEffect(() => {
     fetchCourses();
-  }, []);
+    fetchInstructor();
+  }, [instructorId]);
+
+  const fetchInstructor = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/profile/${instructorId}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Fetched instructor data:", data.user);
+        setInstructor(data.user);
+      } else {
+        console.error("Failed to fetch instructor:", data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch instructor:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/course/instructor/${instructorId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.user.token}`,
-        },
-      });
+      const response = await fetch(`${BACKEND_URL}/course/instructor/${instructorId}`);
       const data = await response.json();
       setCourses(data.courses);
       setIsLoading(false);
@@ -41,20 +52,22 @@ const instructorProfilePage = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <div className="text-center">
-        <div className="flex justify-center mb-6">
-          {user.user.avatar ? (
-            <img src={user.user.avatar} alt={user.user.fullName} className="w-32 h-32 rounded-full object-cover" />
-          ) : null}
+      {instructor ? (
+        <div className="text-center">
+          <div className="flex justify-center mb-3">
+            {instructor.avatar ? (
+              <img src={instructor.avatar} alt={instructor.fullName} className="w-40 h-40 rounded-full object-cover" />
+            ) : null}
+          </div>
+          <p className="text-3xl font-bold">{instructor.fullName}</p>
+          <p className="my-2 text-lg font-semibold">{instructor.userType}</p>
+          <div className="mt-4">
+            <p className="text-xl font-semibold">About/Bio:</p>
+            <p className="mt-2 text-base">{instructor.bio}</p>
+          </div>
         </div>
-        <p className="text-3xl font-bold">{user.user.fullName}</p>
-        <p className="my-2 text-lg font-semibold">{user.user.userType}</p>
-        <div className="mt-4">
-          <p className="text-xl font-semibold">About/Bio:</p>
-          <p className="mt-2 text-base">{user.user.bio}</p>
-        </div>
-      </div>
-      <h1 className="text-2xl font-bold mb-6 text-center pt-16">My Courses ({courses.length})</h1>
+      ) : null}
+      <h1 className="text-2xl font-bold mb-6 text-center pt-16">Courses ({courses.length})</h1>
       {courses && courses.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {courses.map(course => (
@@ -68,4 +81,4 @@ const instructorProfilePage = () => {
   );
 };
 
-export default WithAuth(instructorProfilePage);
+export default instructorProfilePage;
