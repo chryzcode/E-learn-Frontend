@@ -2,12 +2,22 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAuthState, useAuthDispatch } from "@/app/utils/AuthContext";
 import { HiChevronDown } from "react-icons/hi";
+import SearchModal from "./SearchModal";
 
 const Nav = () => {
   const { user } = useAuthState();
   const dispatch = useAuthDispatch();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleExploreClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   // Refs for the dropdown and mobile menu
   const dropdownRef = useRef(null);
@@ -62,21 +72,23 @@ const Nav = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 flex items-center justify-between p-6 mb-5 text-black shadow-lg border border-gray-300 bg-white z-10">
+      <header className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between p-6 text-black shadow-lg bg-white">
         <div className="flex-1">
           <Link href="/" className="text-2xl font-bold">
             E-Learn
           </Link>
         </div>
         <nav className="hidden md:flex flex-1 justify-center text-base space-x-6">
-          {user && user.user.userType == "Instructor" ? <Link href="/instructor/create">Create</Link> : null}
+          {user?.user.userType === "Instructor" && <Link href="/instructor/create">Create</Link>}
           <Link href="/course">Courses</Link>
-          <Link href="/">Explore</Link>
+          <button onClick={handleExploreClick} className="focus:outline-none">
+            Explore
+          </button>
         </nav>
         <div className="hidden md:flex flex-1 justify-end items-center space-x-6">
           {user ? (
             <div className="relative" ref={dropdownRef}>
-              <button onClick={toggleDropdown} className="flex items-center space-x-2 text-base">
+              <button onClick={toggleDropdown} className="flex items-center space-x-2 text-base focus:outline-none">
                 <span>{user.user.fullName}</span>
                 <HiChevronDown />
               </button>
@@ -88,13 +100,13 @@ const Nav = () => {
                   <Link href="/course/my-wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     My WishList
                   </Link>
-                  {user && user.user.userType === "Instructor" ? (
+                  {user.user.userType === "Instructor" && (
                     <Link
-                      href={`/instructor/profile/${user.user._id}`} // Note: user.user._id instead of user._id
+                      href={`/instructor/profile/${user.user._id}`}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       My Account
                     </Link>
-                  ) : null}
+                  )}
                   <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Settings
                   </Link>
@@ -136,26 +148,28 @@ const Nav = () => {
           <nav
             ref={mobileMenuRef}
             className="md:hidden absolute top-16 left-0 text-center right-0 bg-white border-t border-gray-300 shadow-lg z-10 flex flex-col">
-            {user && user.user.userType == "Instructor" ? (
+            {user?.user.userType === "Instructor" && (
               <Link
                 href="/instructor/create"
                 className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
                 onClick={() => setMobileMenuOpen(false)}>
                 Create
               </Link>
-            ) : null}
+            )}
             <Link
               href="/course"
               className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
               onClick={() => setMobileMenuOpen(false)}>
               Courses
             </Link>
-            <Link
-              href="/"
-              className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
-              onClick={() => setMobileMenuOpen(false)}>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                handleExploreClick();
+              }}
+              className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100">
               Explore
-            </Link>
+            </button>
             {user ? (
               <>
                 <Link
@@ -170,14 +184,14 @@ const Nav = () => {
                   onClick={() => setMobileMenuOpen(false)}>
                   My WishList
                 </Link>
-                {user && user.user.userType === "Instructor" ? (
+                {user.user.userType === "Instructor" && (
                   <Link
                     href={`/instructor/profile/${user.user._id}`}
                     className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
                     onClick={() => setMobileMenuOpen(false)}>
                     My Account
                   </Link>
-                ) : null}
+                )}
                 <Link
                   href="/settings"
                   className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
@@ -212,7 +226,7 @@ const Nav = () => {
           </nav>
         )}
       </header>
-      <main className="pt-24">{/* Your page content goes here */}</main>
+      <SearchModal isOpen={isModalOpen} closeModal={closeModal} />
     </>
   );
 };
