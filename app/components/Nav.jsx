@@ -227,6 +227,7 @@ const Nav = () => {
         )}
       </header>
       <SearchModal isOpen={isModalOpen} closeModal={closeModal} />
+      <main className="pt-24">{/* Your page content goes here */}</main>
     </>
   );
 };
