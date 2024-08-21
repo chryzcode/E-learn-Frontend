@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"; // Use next/navigation for useRoute
 import { toast } from "react-toastify";
 import { useAuthDispatch } from "@/app/utils/AuthContext";
 import Spinner from "@/app/components/Spinner";
+import Image from "next/image";
 
 const SignInPage = () => {
   const [email, setEmail] = useState("");
@@ -56,8 +57,8 @@ const SignInPage = () => {
           Sign up
         </a>
       </p>
-      <div className="flex-wrap-container py-5 align-middle px-2 md:px-10">
-        <div className="border border-gray-300 p-4 md:p-6 shadow-lg mx-auto max-w-md">
+      <div className="flex-wrap-container py-5 align-middle px-2 md:px-10 ">
+        <div className="border border-gray-300 p-4 md:p-6 shadow-lg mx-auto max-w-md ">
           <form className="" onSubmit={handleSubmit}>
             <div className="my-3">
               <label htmlFor="email" className="block mb-2 text-sm">
@@ -110,6 +111,8 @@ const SignInPage = () => {
             </Link>
           </div>
         </div>
+
+        <Image src="../images/login.svg" width={500} height={500} className="block mx-auto my-8" />
       </div>
       {loading && <Spinner />} {/* Conditionally render the spinner */}
     </div>
