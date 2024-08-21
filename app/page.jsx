@@ -63,7 +63,7 @@ const Page = () => {
           {user ? (
             <Link href="/courses">
               <motion.div
-                className="my-5 bg-white text-black py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-black hover:text-white border border-black w-max text-base"
+                className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base"
                 whileHover={{ scale: 1.1 }}>
                 View Courses
               </motion.div>
@@ -71,7 +71,7 @@ const Page = () => {
           ) : (
             <Link href="/signup">
               <motion.div
-                className="my-5 bg-white text-black py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-black hover:text-white border border-black w-max text-base"
+                className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base"
                 whileHover={{ scale: 1.1 }}>
                 Sign Up
               </motion.div>
