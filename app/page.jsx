@@ -59,19 +59,19 @@ const Page = () => {
         <p className="py-7 text-2xl max-w-xl mx-auto">
           Create video content, learn, teach and earn for free on <span className="font-bold">E-[nternet] Learn</span>
         </p>
-        <div className="flex justify-center items-center py-7">
+        <div className="flex justify-center items-center py-5">
           {user ? (
             <Link href="/course">
               <motion.div
-                className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base"
+                className="bg-black text-white font-bold py-3 px-6 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-lg"
                 whileHover={{ scale: 1.1 }}>
-                View Courses
+                Courses
               </motion.div>
             </Link>
           ) : (
             <Link href="/auth/sign-up">
               <motion.div
-                className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base"
+                className="bg-black text-xl text-white font-bold py-3 px-6 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max"
                 whileHover={{ scale: 1.1 }}>
                 Sign Up
               </motion.div>
