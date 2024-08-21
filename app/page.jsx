@@ -21,7 +21,7 @@ const Page = () => {
   return (
     <div className="w-10/12 mx-auto">
       {/* Hero Section */}
-      <div className="text-center flex align-middle justify-center items-center flex-col">
+      <div className="text-center flex align-middle justify-center items-center flex-col mt-5">
         <motion.div
           className="py-5"
           initial={{ opacity: 0, y: -50 }}
