@@ -56,12 +56,12 @@ const Page = () => {
             />
           </div>
         </motion.div>
-        <p className="py-3 text-2xl max-w-xl mx-auto">
+        <p className="py-7 text-2xl max-w-xl mx-auto">
           Create video content, learn, teach and earn for free on <span className="font-bold">E-[nternet] Learn</span>
         </p>
-        <div className="flex justify-center items-center">
+        <div className="flex justify-center items-center py-7">
           {user ? (
-            <Link href="/courses">
+            <Link href="/course">
               <motion.div
                 className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base"
                 whileHover={{ scale: 1.1 }}>
@@ -69,7 +69,7 @@ const Page = () => {
               </motion.div>
             </Link>
           ) : (
-            <Link href="/signup">
+            <Link href="/auth/sign-up">
               <motion.div
                 className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base"
                 whileHover={{ scale: 1.1 }}>
@@ -80,7 +80,7 @@ const Page = () => {
         </div>
       </div>
 
-      <div className="my-20">
+      <div className="mb-20">
         {/* Instructor Section */}
         <motion.div
           className="my-10 text-left"
