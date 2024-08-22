@@ -100,6 +100,9 @@ const Nav = () => {
                   <Link href="/course/my-wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     My WishList
                   </Link>
+                  <Link href="/chatrooms" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    My ChatRooms
+                  </Link>
                   {user.user.userType === "Instructor" && (
                     <Link
                       href={`/instructor/profile/${user.user._id}`}
@@ -177,6 +180,12 @@ const Nav = () => {
                   className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
                   onClick={() => setMobileMenuOpen(false)}>
                   My Courses
+                </Link>
+                <Link
+                  href="/chatrooms"
+                  className="block px-4 py-4 text-base text-gray-700 hover:bg-gray-100"
+                  onClick={() => setMobileMenuOpen(false)}>
+                  My ChatRooms
                 </Link>
                 <Link
                   href="/course/my-wishlist"
