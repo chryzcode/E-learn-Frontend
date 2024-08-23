@@ -4,7 +4,7 @@
 
 
 
-form input:focus, form textarea:focus, textarea:focus {
+form input:focus, form textarea:focus, textarea:focus, input {
   border: 1px solid black;
   outline: none;
 }
