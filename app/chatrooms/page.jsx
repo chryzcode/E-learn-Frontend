@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import Spinner from "@/app/components/Spinner";
 import { useAuthState } from "@/app/utils/AuthContext";
 import WithAuth from "@/app/utils/WithAuth";
+import Image from "next/image";
+import Link from "next/link";
 
 const MyChatRoomsPage = () => {
   const [rooms, setRooms] = useState([]);
@@ -45,7 +47,32 @@ const MyChatRoomsPage = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6 text-center">My ChatRooms</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {rooms.map(room => room._id)}
+        {rooms.map(room => {
+          const instructor = room.users.find(u => u.userType === "Instructor");
+
+          return (
+            <Link href={`/chatrooms/${room._id}`} key={room._id} className="border rounded-lg p-4 shadow-md bg-white">
+              <div className="flex items-center mb-3">
+                <Image
+                  src={room.course.thumbnail}
+                  alt="Course Thumbnail"
+                  width={50}
+                  height={50}
+                  className="rounded-full"
+                />
+                <div className="ml-3">
+                  <h2 className="text-lg font-semibold">{room.course.title}</h2>
+                  <p className="text-sm text-gray-600">
+                    Instructor: <Link className="hover:underline" href={`/instructor/profile/${instructor._id}`}>{instructor.fullName}</Link>
+                  </p>
+                </div>
+              </div>
+              <div className="border-t pt-3">
+                <p className="text-sm text-gray-600">{room.users.length} Students</p>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
