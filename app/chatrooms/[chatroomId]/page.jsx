@@ -153,8 +153,7 @@ const ChatRoom = () => {
       sendMessage();
     }
   };
-
-  const isValidMessage = /^[a-zA-Z]+$/.test(newMessage);
+const isValidMessage = newMessage.trim().length > 0;
 
   if (isLoading) {
     return <Spinner />;
@@ -180,8 +179,8 @@ const ChatRoom = () => {
 
         <small className="text-xs ">{chatRoomDetails.users.length} members</small>
       </div>
-      <div className="bg-gray-100 rounded-lg shadow-lg py-3">
-        <div className="overflow-y-auto h-96 border-b-2 border-gray-300 pb-4 px-1.5 mb-4">
+      <div className=" py-3">
+        <div className="overflow-y-auto h-96  pb-4 px-1.5 mb-4">
           {messages.length > 0 ? (
             messages.map((msg, index) => {
               const messageTime = isNaN(new Date(msg.createdAt).getTime())
@@ -191,26 +190,28 @@ const ChatRoom = () => {
               return (
                 <div
                   key={index}
-                  className={`relative flex items-start mb-4 ${msg.sender._id === user.user._id ? "justify-end" : ""}`}>
+                  className={`relative flex items-start mb-2 ${msg.sender._id === user.user._id ? "justify-end" : ""}`}>
                   {msg.sender._id !== user.user._id && (
-                    <div className="flex items-start space-x-3">
-                      {msg.sender.avatar ? (
-                        <Image
-                          src={msg.sender.avatar}
-                          alt={`${msg.sender.fullName}'s avatar`}
-                          width={40}
-                          height={40}
-                          className="rounded-full"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
-                      )}
-                      <div className="bg-white p-3 rounded-lg shadow-sm">
-                        <p className="font-semibold text-gray-800">{msg.sender.fullName || "Unknown Sender"}</p>
-                        <p className="text-sm text-gray-700">{msg.message}</p>
-                        <small className="text-xs text-gray-500">{messageTime}</small>
+                    <>
+                      <div className="flex items-start space-x-3 bg-gray-100 ">
+                        {msg.sender.avatar ? (
+                          <Image
+                            src={msg.sender.avatar}
+                            alt={`${msg.sender.fullName}'s avatar`}
+                            width={40}
+                            height={40}
+                            className="rounded-full"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+                        )}
+                        <div className="bg-white p-3 rounded-lg shadow-sm">
+                          <p className="font-semibold text-gray-800">{msg.sender.fullName || "Unknown Sender"}</p>
+                          <p className="text-sm text-gray-700">{msg.message}</p>
+                        </div>
                       </div>
-                    </div>
+                      <p className="text-xxs text-right font-extralight text-gray-500 min-w-max pl-">{messageTime}</p>
+                    </>
                   )}
                   {msg.sender._id === user.user._id && (
                     <div className="relative flex items-start mb-4">
@@ -236,8 +237,9 @@ const ChatRoom = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="bg-gray-100 p-2 rounded-lg shadow-sm border border-gray-300">
+                        <div className="bg-gray-100 px-6 py-2 rounded-lg shadow-sm border border-gray-300">
                           <p className="text-sm">{msg.message}</p>
+                          <small className="text-xxs text-right text-gray-500">{messageTime}</small>
                         </div>
                       )}
                       <div className="mt-1 text-gray-400">
@@ -273,23 +275,27 @@ const ChatRoom = () => {
             <p className="text-center text-gray-600">No messages yet. Start the conversation!</p>
           )}
         </div>
-        <div className="flex items-center justify-between">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={e => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
-            className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring focus:border-blue-500"
-          />
-          <button
-            className={`ml-2 px-4 py-2 text-white rounded-lg ${
-              isValidMessage ? "bg-blue-500" : "bg-gray-300 cursor-not-allowed"
-            }`}
-            onClick={sendMessage}
-            disabled={!isValidMessage}>
-            Send
-          </button>
+        <div className="bg-gray-100 p-3 fixed bottom-0 left-0 w-full  border-t border-gray-300">
+          <div className="flex items-center justify-between">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={e => setNewMessage(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder="Type a message"
+              className="flex-1 border border-gray-300 p-2 rounded-lg"
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!isValidMessage || messages.length === 0}
+              className={`ml-2 px-4 py-2 rounded-lg ${
+                isValidMessage && messages.length > 0
+                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}>
+              Send
+            </button>
+          </div>
         </div>
       </div>
     </div>
