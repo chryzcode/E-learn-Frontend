@@ -31,6 +31,7 @@ const CourseDetailPage = ({ params }) => {
   const [editingCommentText, setEditingCommentText] = useState("");
   const [studentCount, setStudentCount] = useState(0);
   const [wishlist, setWishlist] = useState([]);
+  const [chatRoomDetails, setChatRoomDetails] = useState(null);
   const [isWhitelisted, setIsWhitelisted] = useState(false);
 
   const videoRef = useRef(null);
@@ -42,6 +43,7 @@ const CourseDetailPage = ({ params }) => {
     fetchStudentCount();
     fetchLikesCountData();
     checkWishlist();
+    getRoomDetails();
   }, [courseId, user]);
 
   const checkWishlist = async () => {
@@ -386,6 +388,18 @@ const CourseDetailPage = ({ params }) => {
     }
   };
 
+  const getRoomDetails = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/room/get-room/course/${courseId}`);
+      const data = await response.json();
+      setChatRoomDetails(data.room);
+    } catch (error) {
+      console.error("Failed to fetch room details:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const toggleWishlist = () => {
     if (isWhitelisted) {
       removeFromWishlist();
@@ -447,9 +461,11 @@ const CourseDetailPage = ({ params }) => {
             </div>
             <div>
               {hasAccess ? (
-                <div className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
+                <Link
+                  href={`/chatrooms/${chatRoomDetails._id}`}
+                  className="bg-black text-white font-bold py-2 px-8 hover:cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:bg-white hover:text-black hover:border hover:border-black w-max text-base">
                   ChatRoom
-                </div>
+                </Link>
               ) : (
                 <div
                   onClick={handleEnrollClick}
