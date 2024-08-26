@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { IoMdMore } from "react-icons/io";
 import { useRef } from "react";
+import { toast } from "react-toastify";
 
 const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
 
@@ -18,7 +19,7 @@ const ChatRoom = () => {
   const { user } = useAuthState();
   const userPopupRef = useRef(null);
   const messagePopupRef = useRef(null);
-
+  const [announcements, setAnnouncements] = useState([]);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -31,6 +32,10 @@ const ChatRoom = () => {
   const [editedMessage, setEditedMessage] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [visibleUserPopups, setVisibleUserPopups] = useState(new Set()); // Track visible popups by user ID
+  const [courseId, setCourseId] = useState(null);
+  const [roomUsersId, setRoomUsersId] = useState([]);
+  const [inviteeStudents, setInviteeStudents] = useState([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (user && user.token) {
@@ -71,7 +76,9 @@ const ChatRoom = () => {
           const response = await fetch(`${BACKEND_URL}/room/get-room/${chatroomId}`);
           const data = await response.json();
           setChatRoomDetails(data.room);
+          setRoomUsersId(data.room.users);
           setInstructor(data.room.course.instructor);
+          setCourseId(data.room.course._id);
         } catch (error) {
           console.error("Failed to fetch room details:", error);
         } finally {
@@ -81,6 +88,7 @@ const ChatRoom = () => {
 
       getRoomDetails();
       fetchMessages();
+      console.log(roomUsersId);
 
       socket.on("roomMessages", updatedMessages => {
         setMessages(updatedMessages);
@@ -99,6 +107,26 @@ const ChatRoom = () => {
       };
     }
   }, [chatroomId, user?.token]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("announcement", announcement => {
+        setAnnouncements(prevAnnouncements => [
+          ...prevAnnouncements,
+          {
+            _id: Date.now(), // Temporary ID for the announcement
+            message: announcement.message,
+            createdAt: announcement.timestamp,
+            type: announcement.type, // Differentiate between types if needed
+          },
+        ]);
+      });
+
+      return () => {
+        socket.off("announcement");
+      };
+    }
+  }, [socket]);
 
   useEffect(() => {
     const handleClickOutside = (ref, callback) => {
@@ -194,6 +222,62 @@ const ChatRoom = () => {
     });
   };
 
+  const getInviteeStudents = async courseId => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/course/${courseId}/students`);
+      const data = await response.json();
+
+      // Extract student objects from the response
+      const students = data.students.map(studentObj => studentObj.student);
+
+      // Filter students who are not in the roomUsersId array
+      const inviteeStudents = students.filter(student => !roomUsersId.includes(student._id));
+      // Update the state with invitee students
+      setInviteeStudents(inviteeStudents);
+    } catch (error) {
+      console.error("Failed to fetch course students:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addStudents = async studentId => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/room/${chatroomId}/invite/${studentId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        toast.error("Failed to add student");
+      }
+      const data = await response.json();
+      if (data.success) {
+        toast.success("Successfully added student");
+      }
+    } catch (error) {
+      console.error("Failed to fetch course students:", error);
+    }
+  };
+
+  const handleClickAddStudents = async () => {
+    setIsDropdownOpen(!isDropdownOpen);
+
+    if (!isDropdownOpen) {
+      await getInviteeStudents(courseId);
+    }
+  };
+
+  const handleSelectStudent = async studentId => {
+    // Handle the logic to invite a student to the chat room
+    console.log(`Inviting student with ID: ${studentId}`);
+    addStudents(studentId);
+    setIsDropdownOpen(false);
+  };
+
   const isValidMessage = newMessage.trim().length > 0;
 
   if (isLoading) {
@@ -218,10 +302,42 @@ const ChatRoom = () => {
           </Link>
         </div>
         <small className="text-xs ">{chatRoomDetails.users.length} members</small>
+        {instructor && (
+          <p onClick={handleClickAddStudents} className="hover:underline hover:cursor-pointer text-sm">
+            Add Students
+          </p>
+        )}
+        {isDropdownOpen && (
+          <div className="relative z-20 mt-2 p-4 bg-white border border-gray-300 w-full rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            {inviteeStudents.length > 0 ? (
+              inviteeStudents.map(student => (
+                <div
+                  key={student._id}
+                  onClick={() => handleSelectStudent(student._id)}
+                  className="flex items-center p-2 hover:bg-gray-100 cursor-pointer mb-3">
+                  <Image src={student.avatar} alt={student.fullName} width={25} height={25} className="rounded-full" />
+                  <span className="ml-3 text-gray-800">{student.fullName}</span>
+                </div>
+              ))
+            ) : (
+              <div className="p-2 text-gray-500 text-center">No students available to invite.</div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="py-3">
         <div className="overflow-y-auto h-96 pb-4 px-3 mb-4 shadow-lg rounded-lg">
+          {/* Display announcements */}
+          {announcements.length > 0 &&
+            announcements.map((ann, index) => (
+              <div key={index} className="bg-gray-200 py-1 px-3 rounded-lg shadow-sm mb-2 text-center text-gray-700">
+                <p className="text-sm">{ann.message}</p>
+                <p className="text-xxs text-gray-500">{formatTime(ann.createdAt)}</p>
+              </div>
+            ))}
+
+          {/* Display messages */}
           {messages.length > 0 ? (
             messages.map((msg, index) => {
               const uniqueKey = `${msg.sender._id}-${msg._id}`;
