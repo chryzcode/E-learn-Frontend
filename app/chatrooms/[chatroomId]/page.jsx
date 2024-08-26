@@ -27,6 +27,7 @@ const ChatRoom = () => {
   const [instructor, setInstructor] = useState(null);
   const { chatroomId } = useParams();
   const [chatRoomDetails, setChatRoomDetails] = useState(null);
+  const [roomMembersCount, setRoomMembersCount] = useState(0);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [editingMessage, setEditingMessage] = useState(null);
   const [editedMessage, setEditedMessage] = useState("");
@@ -36,6 +37,7 @@ const ChatRoom = () => {
   const [roomUsersId, setRoomUsersId] = useState([]);
   const [inviteeStudents, setInviteeStudents] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     if (user && user.token) {
@@ -77,6 +79,7 @@ const ChatRoom = () => {
           const data = await response.json();
           setChatRoomDetails(data.room);
           setRoomUsersId(data.room.users);
+          setRoomMembersCount(data.room.users.length);
           setInstructor(data.room.course.instructor);
           setCourseId(data.room.course._id);
         } catch (error) {
@@ -96,6 +99,12 @@ const ChatRoom = () => {
 
       socket.on("userRemoved", removedUserId => {
         setMessages(prevMessages => prevMessages.filter(msg => msg.sender._id !== removedUserId));
+
+        // Update roomUsersId to remove the user
+        setRoomUsersId(prevIds => prevIds.filter(id => id !== removedUserId));
+
+        // Optionally, add the user back to inviteeStudents
+        setInviteeStudents(prevStudents => [...prevStudents, removedUserId]);
       });
 
       socket.on("error", error => {
@@ -143,11 +152,9 @@ const ChatRoom = () => {
       };
     };
 
-    const closeUserPopup = () => setVisibleUserPopups(new Set());
-    const closeMessagePopup = () => setSelectedMessage(null);
-
-    handleClickOutside(userPopupRef, closeUserPopup);
-    handleClickOutside(messagePopupRef, closeMessagePopup);
+    handleClickOutside(userPopupRef, () => setVisibleUserPopups(new Set()));
+    handleClickOutside(messagePopupRef, () => setSelectedMessage(null));
+    handleClickOutside(dropdownRef, () => setIsDropdownOpen(false)); // Add this line
   }, []);
 
   const formatTime = date => format(new Date(date), "h:mm a");
@@ -189,11 +196,14 @@ const ChatRoom = () => {
     if (socket) {
       socket.emit("editMessage", { messageId, roomId: chatroomId, updatedMessage: editedMessage });
       setMessages(prevMessages =>
-        prevMessages.map(msg => (msg._id === messageId ? { ...msg, message: editedMessage } : msg))
+        prevMessages.map(msg => (msg._id === messageId ? { ...msg, message: editedMessage, edited: true } : msg))
       );
+      // Close the editing popup after saving
       setEditingMessage(null);
+      setSelectedMessage(null);
     }
   };
+
 
   const handleDeleteMessage = messageId => {
     if (socket) {
@@ -206,6 +216,9 @@ const ChatRoom = () => {
     if (socket) {
       socket.emit("removeUser", userId, chatroomId);
       setSelectedUser(null);
+
+      // Update the roomMembersCount after removing the user
+      setRoomMembersCount(prevCount => prevCount - 1);
     }
   };
 
@@ -253,13 +266,23 @@ const ChatRoom = () => {
 
       if (!response.ok) {
         toast.error("Failed to add student");
-      }
-      const data = await response.json();
-      if (data.success) {
-        toast.success("Successfully added student");
+      } else {
+        const data = await response.json();
+        if (data.success) {
+          toast.success("Successfully added student");
+
+          // Update roomUsersId with the new student ID
+          setRoomUsersId(prevIds => [...prevIds, studentId]);
+
+          // Remove student from invitee list
+          setInviteeStudents(prev => prev.filter(student => student._id !== studentId));
+
+          // Update the roomMembersCount after adding the user
+          setRoomMembersCount(prevCount => prevCount + 1);
+        }
       }
     } catch (error) {
-      console.error("Failed to fetch course students:", error);
+      console.error("Failed to add student:", error);
     }
   };
 
@@ -285,7 +308,7 @@ const ChatRoom = () => {
   }
 
   return (
-    <div className="container px-3 mx-auto pb-6">
+    <div className="container px-3 mx-auto">
       <div className="text-center">
         <div className="flex justify-center mb-3">
           <img src={chatRoomDetails.course.thumbnail} className="w-20 h-20 rounded-full object-cover" />
@@ -301,14 +324,16 @@ const ChatRoom = () => {
             <span className="text-gray-500">(Instructor)</span>
           </Link>
         </div>
-        <small className="text-xs ">{chatRoomDetails.users.length} members</small>
+        <small className="text-xs ">{roomMembersCount} members</small>
         {instructor && (
           <p onClick={handleClickAddStudents} className="hover:underline hover:cursor-pointer text-sm">
             Add Students
           </p>
         )}
         {isDropdownOpen && (
-          <div className="relative z-20 mt-2 p-4 bg-white border border-gray-300 w-full rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          <div
+            ref={dropdownRef}
+            className="relative z-20 mt-2 p-4 bg-white border border-gray-300 w-full rounded-lg shadow-lg max-h-60 overflow-y-auto">
             {inviteeStudents.length > 0 ? (
               inviteeStudents.map(student => (
                 <div
@@ -368,26 +393,29 @@ const ChatRoom = () => {
                       )}
                       <p className="font-semibold text-gray-800">{msg.sender.fullName || "Unknown Sender"}</p>
 
-                      {visibleUserPopups.has(uniqueKey) && (
-                        <div
-                          ref={userPopupRef}
-                          className="absolute left-16 mt-2 py-2 w-48 bg-white rounded-lg shadow-xl z-10">
-                          {instructor._id === user.user._id && (
+                      {visibleUserPopups.has(uniqueKey) &&
+                        instructor._id === user.user._id &&
+                        roomUsersId.includes(msg.sender._id) && (
+                          <div
+                            ref={userPopupRef}
+                            className="absolute left-16 mt-2 py-2 w-48 bg-white rounded-lg shadow-xl z-10">
                             <button
                               onClick={() => handleKickUser(msg.sender._id)}
                               className="block px-4 py-2 text-red-500 hover:bg-red-500 hover:text-white w-full text-left">
                               Remove User
                             </button>
-                          )}
-                        </div>
-                      )}
+                          </div>
+                        )}
                     </div>
                   )}
 
                   <div className={`${msg.sender._id === user.user._id ? "self-end" : "self-start"} mt-1`}>
                     {msg.sender._id !== user.user._id ? (
                       <div className="bg-white py-1 px-3 rounded-lg shadow-sm">
-                        <p className="text-sm text-gray-700">{msg.message}</p>
+                        <p className="text-sm text-gray-700">
+                          {msg.message}
+                          {msg.edited && <span className="text-xxs pl-2 text-gray-500">(edited)</span>}
+                        </p>
                         <p className="text-xxs text-right font-extralight text-gray-500 min-w-max">{messageTime}</p>
                       </div>
                     ) : (
