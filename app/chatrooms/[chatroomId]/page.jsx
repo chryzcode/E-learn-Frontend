@@ -356,13 +356,12 @@ const ChatRoom = () => {
           </div>
         )}
       </div>
-
-      <div className="py-3">
-        <div className="overflow-y-auto h-96 pb-4 px-3 mb-4 shadow-lg rounded-lg">
+      <div className="flex flex-col h-full">
+        <div className="flex-grow overflow-y-auto pb-4 px-3 mb-12 shadow-lg rounded-lg">
           {/* Display announcements */}
           {announcements.length > 0 &&
             announcements.map((ann, index) => (
-              <div key={index} className="bg-gray-200 py-1 px-3 rounded-lg shadow-sm mb-2 text-center text-gray-700">
+              <div key={index} className="bg-yellow-200 py-1 px-3 rounded-lg shadow-sm mb-2 text-center text-gray-700">
                 <p className="text-sm">{ann.message}</p>
                 <p className="text-xxs text-gray-500">{formatTime(ann.createdAt)}</p>
               </div>
@@ -490,7 +489,7 @@ const ChatRoom = () => {
           )}
         </div>
 
-        <div className="bg-gray-100 relative p-3 bottom-0 left-0 w-full rounded-lg  border-t border-gray-300">
+        <div className="bg-gray-100 p-3 fixed bottom-0 left-0 w-full rounded-lg border-t border-gray-300">
           <div className="flex items-center justify-between">
             <input
               type="text"
