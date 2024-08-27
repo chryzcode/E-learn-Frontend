@@ -330,12 +330,13 @@ const ChatRoom = () => {
             <span className="text-gray-500">(Instructor)</span>
           </Link>
         </div>
-        <small className="text-xs ">{roomMembersCount} members</small>
         {instructor && (
-          <p onClick={handleClickAddStudents} className="hover:underline hover:cursor-pointer text-sm">
+          <p onClick={handleClickAddStudents} className="hover:cursor-pointer hover:underline text-sm text-gray-500">
             Add Students
           </p>
         )}
+        <small className="text-xs ">{roomMembersCount} members</small>
+
         {isDropdownOpen && (
           <div
             ref={dropdownRef}
@@ -356,7 +357,7 @@ const ChatRoom = () => {
           </div>
         )}
       </div>
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full pt-5">
         <div className="flex-grow overflow-y-auto pb-4 px-3 mb-12 shadow-lg rounded-lg">
           {/* Display announcements */}
           {announcements.length > 0 &&
@@ -374,13 +375,31 @@ const ChatRoom = () => {
               const messageTime = isNaN(new Date(msg.createdAt).getTime())
                 ? formatTime(new Date())
                 : formatTime(msg.createdAt);
+              const currentMessageDate = new Date(msg.createdAt);
+              const previousMessageDate = index > 0 ? new Date(messages[index - 1].createdAt) : null;
+
+              // Determine if the date should be shown
+              const showDate =
+                index === 0 || currentMessageDate.toLocaleDateString() !== previousMessageDate?.toLocaleDateString();
 
               return (
                 <div
-                  key={index}
+                  key={uniqueKey}
                   className={`relative flex flex-col mb-3 ${
                     msg.sender._id === user.user._id ? "items-end" : "items-start"
                   }`}>
+                  {/* Show date once for messages on the same day */}
+                  {showDate && (
+                    <div className="text-xxs mb-2 w-full flex justify-center text-gray-500">
+                      {currentMessageDate.toLocaleDateString() === new Date().toLocaleDateString()
+                        ? "Today"
+                        : currentMessageDate.toLocaleDateString("en-US", {
+                            day: "numeric",
+                            month: "long",
+                            year: currentMessageDate.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
+                          })}
+                    </div>
+                  )}
                   {msg.sender._id !== user.user._id && (
                     <div
                       className="flex items-center space-x-3 cursor-pointer relative"
