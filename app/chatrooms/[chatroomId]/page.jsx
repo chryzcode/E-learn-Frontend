@@ -204,7 +204,6 @@ const ChatRoom = () => {
     }
   };
 
-
   const handleDeleteMessage = messageId => {
     if (socket) {
       socket.emit("deleteMessage", { messageId, roomId: chatroomId });
@@ -217,8 +216,15 @@ const ChatRoom = () => {
       socket.emit("removeUser", userId, chatroomId);
       setSelectedUser(null);
 
-      // Update the roomMembersCount after removing the user
+      // Update roomMembersCount after removing the user
+      toast.success("User removed successfully");
       setRoomMembersCount(prevCount => prevCount - 1);
+
+      // Remove the user from roomUsersId
+      setRoomUsersId(prevIds => prevIds.filter(id => id !== userId));
+
+      // Add the removed user to inviteeStudents
+      setInviteeStudents(prevStudents => [...prevStudents, userId]);
     }
   };
 
@@ -448,7 +454,7 @@ const ChatRoom = () => {
                           </div>
                         )}
                         <span
-                          className="absolute right-[-25px] top-[-5px] text-gray-500 hover:cursor-pointer"
+                          className="absolute right-[-15px] text-gray-500 hover:cursor-pointer"
                           onClick={() => setSelectedMessage(msg._id)}>
                           <IoMdMore />
                         </span>
@@ -484,23 +490,27 @@ const ChatRoom = () => {
           )}
         </div>
 
-        <div className="flex items-center space-x-3">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={e => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            className="flex-grow border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="Type your message..."
-          />
-          <button
-            onClick={sendMessage}
-            className={`px-4 py-2 rounded-full text-white ${
-              isValidMessage ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-300"
-            }`}
-            disabled={!isValidMessage}>
-            Send
-          </button>
+        <div className="bg-gray-100 relative p-3 bottom-0 left-0 w-full rounded-lg  border-t border-gray-300">
+          <div className="flex items-center justify-between">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={e => setNewMessage(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder="Type a message"
+              className="flex-1 border border-gray-300 p-2 rounded-lg"
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!isValidMessage || messages.length === 0}
+              className={`ml-2 px-4 py-2 rounded-lg ${
+                isValidMessage && messages.length > 0
+                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}>
+              Send
+            </button>
+          </div>
         </div>
       </div>
     </div>
