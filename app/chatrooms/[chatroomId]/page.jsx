@@ -115,7 +115,7 @@ const ChatRoom = () => {
         socket.disconnect();
       };
     }
-  }, [chatroomId, user?.token]);
+  }, []);
 
   useEffect(() => {
     if (socket) {
@@ -324,13 +324,7 @@ const ChatRoom = () => {
             {chatRoomDetails.course.title}
           </Link>
         </div>
-        <div>
-          <Link href={`/instructor/profile/${instructor._id}`} className="hover:underline">
-            {instructor.fullName}
-            <span className="text-gray-500">(Instructor)</span>
-          </Link>
-        </div>
-        {instructor && (
+        {instructor._id == user.user._id && (
           <p onClick={handleClickAddStudents} className="hover:cursor-pointer hover:underline text-sm text-gray-500">
             Add Students
           </p>
@@ -415,7 +409,16 @@ const ChatRoom = () => {
                       ) : (
                         <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
                       )}
-                      <p className="font-semibold text-gray-800">{msg.sender.fullName || "Unknown Sender"}</p>
+                      <p className="font-semibold text-gray-800">
+                        {msg.sender._id === instructor._id ? (
+                          <Link href={`/instructor/profile/${instructor._id}`}>
+                            {msg.sender.fullName}
+                            <span className="text-xs text-gray-500"> (instructor)</span>
+                          </Link>
+                        ) : (
+                          <span> {msg.sender.fullName} </span>
+                        )}
+                      </p>
 
                       {visibleUserPopups.has(uniqueKey) &&
                         instructor._id === user.user._id &&
