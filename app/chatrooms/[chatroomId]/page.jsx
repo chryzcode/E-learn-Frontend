@@ -19,7 +19,6 @@ const ChatRoom = () => {
   const { user } = useAuthState();
   const userPopupRef = useRef(null);
   const messagePopupRef = useRef(null);
-  const [announcements, setAnnouncements] = useState([]);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -40,6 +39,42 @@ const ChatRoom = () => {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
+    if (socket) {
+      // Join the room when the component mounts
+      socket.emit("joinRoom", courseId, user.user._id);
+
+      // Listen for new messages
+      socket.on("newMessage", newMessage => {
+        setMessages(prevMessages => [...prevMessages, newMessage]);
+      });
+
+      // Listen for updated messages
+      socket.on("updatedMessage", updatedMessage => {
+        setMessages(prevMessages => prevMessages.map(msg => (msg._id === updatedMessage._id ? updatedMessage : msg)));
+      });
+
+      // Listen for deleted messages
+      socket.on("messageDeleted", deletedMessageId => {
+        setMessages(prevMessages => prevMessages.filter(msg => msg._id !== deletedMessageId));
+      });
+
+      // Listen for user removal
+      socket.on("userRemoved", removedUserId => {
+        setRoomUsersId(prevIds => prevIds.filter(id => id !== removedUserId));
+        setInviteeStudents(prevStudents => [...prevStudents, removedUserId]);
+      });
+
+      // Cleanup listeners on unmount
+      return () => {
+        socket.off("newMessage");
+        socket.off("updatedMessage");
+        socket.off("messageDeleted");
+        socket.off("userRemoved");
+      };
+    }
+  }, [socket, courseId, user.user._id]);
+
+  useEffect(() => {
     if (user && user.token) {
       const socket = io(BACKEND_URL, {
         transports: ["websocket"],
@@ -48,30 +83,12 @@ const ChatRoom = () => {
       setSocket(socket);
 
       socket.on("connect", () => {
-        socket.emit("joinRoom", chatroomId, user.user._id);
+        socket.emit("joinRoom", courseId, user.user._id);
       });
 
       socket.on("disconnect", () => {
         console.log("Socket disconnected");
       });
-
-      const fetchMessages = async () => {
-        try {
-          const response = await fetch(`${BACKEND_URL}/room/message/${chatroomId}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
-            },
-          });
-          const data = await response.json();
-          setMessages(data.messages || []);
-        } catch (error) {
-          console.error("Failed to fetch messages:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
 
       const getRoomDetails = async () => {
         try {
@@ -90,12 +107,7 @@ const ChatRoom = () => {
       };
 
       getRoomDetails();
-      fetchMessages();
       console.log(roomUsersId);
-
-      socket.on("roomMessages", updatedMessages => {
-        setMessages(updatedMessages);
-      });
 
       socket.on("userRemoved", removedUserId => {
         setMessages(prevMessages => prevMessages.filter(msg => msg.sender._id !== removedUserId));
@@ -119,23 +131,21 @@ const ChatRoom = () => {
 
   useEffect(() => {
     if (socket) {
-      socket.on("announcement", announcement => {
-        setAnnouncements(prevAnnouncements => [
-          ...prevAnnouncements,
-          {
-            _id: Date.now(), // Temporary ID for the announcement
-            message: announcement.message,
-            createdAt: announcement.timestamp,
-            type: announcement.type, // Differentiate between types if needed
-          },
-        ]);
+      // Get initial room messages
+      socket.emit("getRoomMessages", chatroomId);
+
+      // Listen for initial room messages
+      socket.on("roomMessages", updatedMessages => {
+        console.log("Received roomMessages:", updatedMessages);
+        setMessages(updatedMessages);
       });
 
+      // Cleanup listeners on unmount or when chatroomId changes
       return () => {
-        socket.off("announcement");
+        socket.off("roomMessages");
       };
     }
-  }, [socket]);
+  }, [socket, chatroomId]);
 
   useEffect(() => {
     const handleClickOutside = (ref, callback) => {
@@ -172,20 +182,6 @@ const ChatRoom = () => {
         message: newMessage.trim(),
         sender: user.user._id,
       };
-
-      setMessages(prevMessages => [
-        ...prevMessages,
-        {
-          _id: Date.now(), // Temporary ID until the server assigns one
-          message: newMessage.trim(),
-          sender: {
-            _id: user.user._id,
-            fullName: user.user.fullName,
-            avatar: user.user.avatar,
-          },
-          createdAt: new Date().toISOString(),
-        },
-      ]);
 
       socket.emit("sendMessage", messageData);
       setNewMessage("");
@@ -353,15 +349,6 @@ const ChatRoom = () => {
       </div>
       <div className="flex flex-col h-full pt-5">
         <div className="flex-grow overflow-y-auto pb-4 px-3 mb-12 shadow-lg rounded-lg">
-          {/* Display announcements */}
-          {announcements.length > 0 &&
-            announcements.map((ann, index) => (
-              <div key={index} className="bg-yellow-200 py-1 px-3 rounded-lg shadow-sm mb-2 text-center text-gray-700">
-                <p className="text-sm">{ann.message}</p>
-                <p className="text-xxs text-gray-500">{formatTime(ann.createdAt)}</p>
-              </div>
-            ))}
-
           {/* Display messages */}
           {messages.length > 0 ? (
             messages.map((msg, index) => {
@@ -375,6 +362,15 @@ const ChatRoom = () => {
               // Determine if the date should be shown
               const showDate =
                 index === 0 || currentMessageDate.toLocaleDateString() !== previousMessageDate?.toLocaleDateString();
+
+              // Check if the message is an announcement
+              if (msg.isAnnouncement) {
+                return (
+                  <div key={uniqueKey} className="flex justify-center mb-3">
+                    <span className="text-gray-600 text-sm italic">{msg.message}</span>
+                  </div>
+                );
+              }
 
               return (
                 <div
