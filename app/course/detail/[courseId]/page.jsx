@@ -11,6 +11,7 @@ import { IoHeartDislikeOutline } from "react-icons/io5";
 import { BiDislike } from "react-icons/bi";
 import { FaRegHeart } from "react-icons/fa";
 import Link from "next/link";
+import { fetchClient } from "@/app/utils/FetchClient";
 
 const CourseDetailPage = ({ params }) => {
   const { courseId } = params;
@@ -47,7 +48,7 @@ const CourseDetailPage = ({ params }) => {
   }, [courseId, user]);
 
   const checkWishlist = async () => {
-    const response = await fetch(`${BACKEND_URL}/course/wishlists`, {
+    const response = await fetchClient(`${BACKEND_URL}/course/wishlists`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -62,7 +63,7 @@ const CourseDetailPage = ({ params }) => {
   };
 
   const fetchStudentCount = async () => {
-    const response = await fetch(`${BACKEND_URL}/course/${courseId}/students`);
+    const response = await fetchClient(`${BACKEND_URL}/course/${courseId}/students`);
 
     if (!response.ok) {
       throw new Error("Failed to fetch students");
@@ -78,7 +79,7 @@ const CourseDetailPage = ({ params }) => {
   };
 
   const fetchLikesCountData = async () => {
-    const response = await fetch(`${BACKEND_URL}/course/like/${courseId}`);
+    const response = await fetchClient(`${BACKEND_URL}/course/like/${courseId}`);
 
     if (!response.ok) {
       throw new Error("Failed to get couse like details");
@@ -97,7 +98,7 @@ const CourseDetailPage = ({ params }) => {
     try {
       setIsLoading(true);
 
-      const response = await fetch(`${BACKEND_URL}/course/detail/${courseId}`, {
+      const response = await fetchClient(`${BACKEND_URL}/course/detail/${courseId}`, {
         method: "GET",
         headers: {
           Authorization: user && user.token ? `Bearer ${user.token}` : "",
@@ -153,7 +154,7 @@ const CourseDetailPage = ({ params }) => {
     }
 
     try {
-      const response = await fetch(`${BACKEND_URL}/course/comment/${courseId}`, {
+      const response = await fetchClient(`${BACKEND_URL}/course/comment/${courseId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -189,7 +190,7 @@ const CourseDetailPage = ({ params }) => {
     }
 
     try {
-      const response = await fetch(`${BACKEND_URL}/course/${courseId}/comment/${editingCommentId}`, {
+      const response = await fetchClient(`${BACKEND_URL}/course/${courseId}/comment/${editingCommentId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -227,7 +228,7 @@ const CourseDetailPage = ({ params }) => {
     }
 
     try {
-      const response = await fetch(`${BACKEND_URL}/course/${courseId}/comment/${commentId}`, {
+      const response = await fetchClient(`${BACKEND_URL}/course/${courseId}/comment/${commentId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${user.token}`,
@@ -258,7 +259,7 @@ const CourseDetailPage = ({ params }) => {
 
   const enrolCourse = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/course/enroll/${courseId}`, {
+      const response = await fetchClient(`${BACKEND_URL}/course/enroll/${courseId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -289,7 +290,7 @@ const CourseDetailPage = ({ params }) => {
 
   const likeCourse = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/course/like/${courseId}`, {
+      const response = await fetchClient(`${BACKEND_URL}/course/like/${courseId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -313,7 +314,7 @@ const CourseDetailPage = ({ params }) => {
 
   const unlikeCourse = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/course/like/${courseId}`, {
+      const response = await fetchClient(`${BACKEND_URL}/course/like/${courseId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -345,7 +346,7 @@ const CourseDetailPage = ({ params }) => {
 
   const addToWishlist = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/course/${courseId}/wishlist`, {
+      const res = await fetchClient(`${BACKEND_URL}/course/${courseId}/wishlist`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -368,7 +369,7 @@ const CourseDetailPage = ({ params }) => {
 
   const removeFromWishlist = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/course/${courseId}/wishlist`, {
+      const res = await fetchClient(`${BACKEND_URL}/course/${courseId}/wishlist`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -390,7 +391,7 @@ const CourseDetailPage = ({ params }) => {
 
   const getRoomDetails = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/room/get-room/course/${courseId}`);
+      const response = await fetchClient(`${BACKEND_URL}/room/get-room/course/${courseId}`);
       const data = await response.json();
       setChatRoomDetails(data.room);
     } catch (error) {
