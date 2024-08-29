@@ -99,7 +99,7 @@ const Page = () => {
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} className="shadow-lg rounded-lg py-12 px-6">
               <Image src="../images/pay_online.svg" width={150} height={150} className="ml-auto" />
-              <p className="py-5 md:text-lg text-sm">Content monetization</p>
+              <p className="py-5 md:text-lg text-sm">Content monetization(test payment)</p>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} className="shadow-lg rounded-lg py-12 px-6">
               <Image src="../images/tutorial_video.svg" width={200} height={200} className="ml-auto" />
