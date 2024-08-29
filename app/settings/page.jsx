@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import WithAuth from "../utils/WithAuth";
 import { useRouter } from "next/navigation";
 import Spinner from "@/app/components/Spinner";
+import { fetchClient } from "../utils/FetchClient";
 
 const SettingsPage = () => {
   const [fullName, setFullName] = useState("");
@@ -22,7 +23,7 @@ const SettingsPage = () => {
     const fetchUserData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${BACKEND_URL}/current-user`, {
+        const response = await fetchClient(`${BACKEND_URL}/current-user`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -65,7 +66,7 @@ const SettingsPage = () => {
         formData.append("password", password);
       }
 
-      const response = await fetch(`${BACKEND_URL}/update`, {
+      const response = await fetchClient(`${BACKEND_URL}/update`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${user.token}`,
@@ -102,7 +103,7 @@ const SettingsPage = () => {
   const deactivateUser = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/delete`, {
+      const res = await fetchClient(`${BACKEND_URL}/delete`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

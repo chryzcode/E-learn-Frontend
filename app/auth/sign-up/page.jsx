@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Spinner from "@/app/components/Spinner";
+import { useAuthState } from "@/app/utils/AuthContext";
 
 const SignUpPage = () => {
   const [fullName, setFullName] = useState("");
@@ -12,6 +13,7 @@ const SignUpPage = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { user } = useAuthState();
 
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
 
@@ -44,6 +46,11 @@ const SignUpPage = () => {
       setLoading(false);
     }
   };
+
+  if (user) {
+    router.push("/");
+  }
+
 
   return (
     <div className="mx-4 md:mx-10">

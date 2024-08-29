@@ -5,6 +5,7 @@ import Spinner from "@/app/components/Spinner";
 import CoursesListing from "@/app/components/CoursesListing";
 import { useAuthState } from "@/app/utils/AuthContext";
 import WithAuth from "@/app/utils/WithAuth";
+import { fetchClient } from "@/app/utils/FetchClient";
 
 const MyCoursesPage = () => {
   const [courses, setCourses] = useState([]);
@@ -18,7 +19,7 @@ const MyCoursesPage = () => {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/course/student/my-courses`, {
+      const response = await fetchClient(`${BACKEND_URL}/course/student/my-courses`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

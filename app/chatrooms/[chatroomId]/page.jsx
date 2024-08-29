@@ -12,6 +12,7 @@ import Link from "next/link";
 import { IoMdMore } from "react-icons/io";
 import { useRef } from "react";
 import { toast } from "react-toastify";
+import { fetchClient } from "@/app/utils/FetchClient";
 
 const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
 
@@ -92,7 +93,7 @@ const ChatRoom = () => {
 
       const getRoomDetails = async () => {
         try {
-          const response = await fetch(`${BACKEND_URL}/room/get-room/${chatroomId}`);
+          const response = await fetchClient(`${BACKEND_URL}/room/get-room/${chatroomId}`);
           const data = await response.json();
           setChatRoomDetails(data.room);
           setRoomUsersId(data.room.users);
@@ -239,7 +240,7 @@ const ChatRoom = () => {
 
   const getInviteeStudents = async courseId => {
     try {
-      const response = await fetch(`${BACKEND_URL}/course/${courseId}/students`);
+      const response = await fetchClient(`${BACKEND_URL}/course/${courseId}/students`);
       const data = await response.json();
 
       // Extract student objects from the response
@@ -258,7 +259,7 @@ const ChatRoom = () => {
 
   const addStudents = async studentId => {
     try {
-      const response = await fetch(`${BACKEND_URL}/room/${chatroomId}/invite/${studentId}`, {
+      const response = await fetchClient(`${BACKEND_URL}/room/${chatroomId}/invite/${studentId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

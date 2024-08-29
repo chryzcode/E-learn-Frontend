@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Spinner from "@/app/components/Spinner";
 import WithAuth from "@/app/utils/WithAuth";
+import { fetchClient } from "@/app/utils/FetchClient";
 
 const CreateCoursePage = () => {
   const [title, setTitle] = useState("");
@@ -32,7 +33,7 @@ const CreateCoursePage = () => {
     const getCourseCategories = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${BACKEND_URL}/course/categories`, {
+        const response = await fetchClient(`${BACKEND_URL}/course/categories`, {
           headers: {
             "Content-Type": "application/json",
           },
