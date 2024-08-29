@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { useAuthDispatch } from "@/app/utils/AuthContext";
 import Spinner from "@/app/components/Spinner";
 import Image from "next/image";
+import { useAuthState } from "@/app/utils/AuthContext";
 
 const SignInPage = () => {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ const SignInPage = () => {
   const [loading, setLoading] = useState(false); // Manage loading state
   const dispatch = useAuthDispatch();
   const router = useRouter();
+  const { user } = useAuthState();
 
   const BACKEND_URL = "https://e-learn-l8dr.onrender.com";
 
@@ -47,6 +49,10 @@ const SignInPage = () => {
       setLoading(false); // Set loading to false when the request is completed
     }
   };
+
+  if (user) {
+     router.push("/");
+  }
 
   return (
     <div className="mx-4 md:mx-10">

@@ -6,6 +6,7 @@ import { useAuthState } from "@/app/utils/AuthContext";
 import WithAuth from "@/app/utils/WithAuth";
 import Image from "next/image";
 import Link from "next/link";
+import { fetchClient } from "../utils/FetchClient";
 
 const MyChatRoomsPage = () => {
   const [rooms, setRooms] = useState([]);
@@ -19,7 +20,7 @@ const MyChatRoomsPage = () => {
 
   const fetchRooms = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/room`, {
+      const response = await fetchClient(`${BACKEND_URL}/room`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
