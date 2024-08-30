@@ -1,4 +1,4 @@
-import { toast } from "react-toastify";
+import { useAuthDispatch } from "./AuthContext";
 
 export async function fetchClient(url, options = {}) {
   const response = await fetch(url, {
@@ -17,11 +17,16 @@ export async function fetchClient(url, options = {}) {
   return response;
 }
 
+// signOutUser function
 function signOutUser() {
+  const dispatch = useAuthDispatch();
+
   // Show a toast message before redirecting
   toast.info("Your session has expired. Please log in again.");
 
-  // Clear any stored tokens or session data
+  // Dispatch the LOGOUT action to clear user data and local storage
+  dispatch({ type: "LOGOUT" });
+
   // Redirect the user to the login page
   setTimeout(() => {
     window.location.href = "/auth/sign-in"; // Adjust the URL to your login page
